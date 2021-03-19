@@ -1,3 +1,4 @@
+import pygame
 # This is a sample Python script.
 
 # Press Shift+F10 to execute it or replace it with your code.
@@ -15,3 +16,8 @@ if __name__ == '__main__':
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 test_change = True
+
+
+class Items():
+    def __init__(self):
+        self.image = pygame.image.load('pacman.png')
