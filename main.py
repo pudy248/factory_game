@@ -53,6 +53,36 @@ class Tile:
         return True
 
 
+class Player:
+    def __init__(self):
+        self.selected_tile = False
+        self.last_pos = (0, 0)
+
+    def is_in_level(self):  # Detects if pos is within the level
+        return self.last_pos[1] < 300
+
+    def can_place(self):
+        return self.selected_tile and self.get_tile().is_open(self.selected_tile.type)
+
+    def can_select(self):
+        if self.get_tile:
+            return True
+        return False
+
+    def get_tile(self):
+        return level.tiles[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE]
+
+    def place(self):
+        level.tiles[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE] = self.selected_tile
+
+    def click(self, pos):
+        self.last_pos = pos
+        if self.is_in_level():
+            if self.can_place():
+                self.place()
+        elif self.can_select():
+            self.selected_tile = self.get_tile()
+
 class Extractor(Tile):
     def __init__(self, pos):
         super().__init__(pos)
@@ -61,7 +91,6 @@ class Extractor(Tile):
     def tick(self):
         # adds an item based on resources
         super(Extractor, self).tick()
-
 
 class Manufacturer(Tile):
     def __init__(self, pos):
