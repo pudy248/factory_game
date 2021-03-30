@@ -1,17 +1,20 @@
-# This is a sample Python script.
+import pygame as pg
+import sys, os
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+os.environ['SDL_VIDEO_CENTERED'] = '1'
+pg.init()
+clock = pg.time.Clock()
+W = pg.display.Info().current_w
+H = pg.display.Info().current_h
+SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
+#####CONSTANTS#####
+FPS = 60
+#####################
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
-test_change = False
+while True:
+    for event in pg.event.get():
+        if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+            pg.quit()
+            sys.exit()
+    clock.tick(FPS)
