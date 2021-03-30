@@ -36,7 +36,6 @@ class Tile:
         return True
 
 
-
 class Player:
     def __init__(self):
         self.selected_tile = False
@@ -46,7 +45,7 @@ class Player:
         return self.last_pos[1] < 300
 
     def can_place(self):
-        return self.selected_tile and self.get_tile().replacable
+        return self.selected_tile and self.get_tile().is_open(self.selected_tile.type)
 
     def can_select(self):
         if self.get_tile:
@@ -54,13 +53,16 @@ class Player:
         return False
 
     def get_tile(self):
-        return level.tiles[self.last_pos[1]//10][self.last_pos[0]//10]
+        return level.tiles[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE]
+
+    def place(self):
+        level.tiles[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE] = self.selected_tile
 
     def click(self, pos):
         self.last_pos = pos
         if self.is_in_level():
             if self.can_place():
-                self.place(self.selected_tile)
+                self.place()
         elif self.can_select():
             self.selected_tile = self.get_tile()
 
