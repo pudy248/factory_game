@@ -30,7 +30,7 @@ class Loader:
 
     def load_level(self, n):
         self.lNum = n
-        text = str(n) + '.txt'
+        text = 'levels/' + str(n) + '.txt'
         lines = []
         map = []
         with open(text, 'rt') as myfile:
