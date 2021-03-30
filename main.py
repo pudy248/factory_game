@@ -195,7 +195,6 @@ class Splitter(Tile):
         super().__init__(pos, angle)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
-
     def tick(self):
         # Alternates between left and right
         i = 0
@@ -209,9 +208,12 @@ class Splitter(Tile):
                 temp.direction = direction.rotate(90 if self.split_bool else 270)
                 temp.moved = True
                 level.tile_array[int(self.pos[0] + temp.direction.x)][int(self.pos[1] + temp.direction.y)].items.append(temp)
-
+level = None  # Level class, overwritten when the loader is called
 
 while True:
+    load = Loader()
+    lvl = load.load_level(0)
+    lvl.draw_level()
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
