@@ -130,6 +130,7 @@ class Player:
         return lvl.map[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE]
 
     def place(self):  # works
+        self.selected_tile.pos = ((self.last_pos[0]//TILE_SIZE)*TILE_SIZE, (self.last_pos[1]//TILE_SIZE)*TILE_SIZE)
         lvl.map[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE] = self.selected_tile
 
     def click(self, pos):
@@ -137,8 +138,11 @@ class Player:
         if self.is_in_level():
             if self.can_place():
                 self.place()
-        elif self.can_select():
-            self.selected_tile = self.get_tile()
+
+    def select(self, key):
+        if key == pg.K_1:
+            print("selected")
+            self.selected_tile = Tile(self.last_pos)
 
 class Extractor(Tile):
     def __init__(self, pos, angle):
@@ -214,10 +218,16 @@ load = Loader()
 lvl = load.load_level(0) # 0.txt is just a dummy for testing
 player = Player()
 while True:
-    lvl.draw_level() # only here to test that the file was parsed properly
+    # lvl.draw_level() # only here to test that the file was parsed properly
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
             sys.exit()
+        elif event.type == pg.KEYDOWN:
+            player.select(event.key)
+        elif event.type == pg.MOUSEBUTTONUP:
+            lvl.draw_level()
+            player.click(event.pos)
+            lvl.draw_level()
     pg.display.update()
     clock.tick(FPS)
