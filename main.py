@@ -110,7 +110,6 @@ class Level:
     def draw_level(self):
         print(self.map) # just for testing
 
-
 class Loader:
     def __init__(self):
         self.lNum = 0
