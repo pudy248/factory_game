@@ -40,6 +40,7 @@ class Loader:
         for i in range(len(map)):
             map[i] = lines[i].split(" ")
         return Level(map)
+   
 while True:
     load = Loader()
     lvl = load.load_level(0) # 0.txt is just a dummy for testing
