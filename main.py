@@ -130,6 +130,7 @@ class Loader:
             map[i] = lines[i].split(" ")
         return Level(map)
 
+
 level = None  # Level class, overwritten when the loader is called
 
 while True:
