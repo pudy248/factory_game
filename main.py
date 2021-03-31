@@ -20,6 +20,7 @@ class Tile:
         self.direction = [0, 0]
         self.image = pg.transform.scale(pg.image.load("pacman.png"), (TILE_SIZE, TILE_SIZE))
         self.resource = "None"  # None, Iron, Wood, Coal, Oil, Out of Bounds
+        self.type = "Tile"
         self.items = []
 
     def draw(self):
