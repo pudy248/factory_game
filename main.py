@@ -212,8 +212,8 @@ level = None  # Level class, overwritten when the loader is called
 
 while True:
     load = Loader()
-    lvl = load.load_level(0)
-    lvl.draw_level()
+    lvl = load.load_level(0) # 0.txt is just a dummy for testing
+    lvl.draw_level() # only here to test that the file was parsed properly
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
