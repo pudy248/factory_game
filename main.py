@@ -8,7 +8,6 @@ W = pg.display.Info().current_w
 H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
-
 #####CONSTANTS#####
 FPS = 5
 TILE_SIZE = 100  # dimensions of each tile in pixels
