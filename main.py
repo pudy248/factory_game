@@ -121,11 +121,6 @@ class Player:
     def can_place(self):  # should work
         return self.selected_tile and self.get_tile().is_open(self.selected_tile.type)
 
-    def can_select(self):
-        if self.get_tile:
-            return True
-        return False
-
     def get_tile(self):  # works
         return lvl.map[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE]
 
@@ -141,7 +136,6 @@ class Player:
 
     def select(self, key):
         if key == pg.K_1:
-            print("selected")
             self.selected_tile = Tile(self.last_pos)
 
 class Extractor(Tile):
@@ -226,8 +220,6 @@ while True:
         elif event.type == pg.KEYDOWN:
             player.select(event.key)
         elif event.type == pg.MOUSEBUTTONUP:
-            lvl.draw_level()
             player.click(event.pos)
-            lvl.draw_level()
     pg.display.update()
     clock.tick(FPS)
