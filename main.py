@@ -118,7 +118,7 @@ class Player:
     def is_in_level(self):  # Detects if pos is within the level
         return self.last_pos[0] < TILE_SIZE*len(lvl.map[0]) and self.last_pos[1] < TILE_SIZE*len(lvl.map)
 
-    def can_place(self):
+    def can_place(self):  # should work
         return self.selected_tile and self.get_tile().is_open(self.selected_tile.type)
 
     def can_select(self):
@@ -126,10 +126,10 @@ class Player:
             return True
         return False
 
-    def get_tile(self): #works
+    def get_tile(self):  # works
         return lvl.map[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE]
 
-    def place(self):
+    def place(self):  # works
         lvl.map[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE] = self.selected_tile
 
     def click(self, pos):
