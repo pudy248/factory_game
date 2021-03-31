@@ -18,10 +18,10 @@ class Level:
         self.map = map
 
     def world_tick(self):
-        x = 4
+        x = 4 # placeholder
 
     def draw_level(self):
-        print(self.map)
+        print(self.map) # just for testing
 
 class Loader:
     def __init__(self):
@@ -42,8 +42,8 @@ class Loader:
         return Level(map)
 while True:
     load = Loader()
-    lvl = load.load_level(0)
-    lvl.draw_level()
+    lvl = load.load_level(0) # 0.txt is just a dummy for testing
+    lvl.draw_level() # only here to test that the file was parsed properly
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
