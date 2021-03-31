@@ -44,7 +44,7 @@ class Player:
         self.last_pos = (0, 0)
 
     def is_in_level(self):  # Detects if pos is within the level
-        return self.last_pos[1] < 300
+        return self.last_pos[0] < TILE_SIZE*len(lvl.map[0]) and self.last_pos[1] < TILE_SIZE*len(lvl.map)
 
     def can_place(self):
         return self.selected_tile and self.get_tile().is_open(self.selected_tile.type)
@@ -54,11 +54,11 @@ class Player:
             return True
         return False
 
-    def get_tile(self):
-        return level.tiles[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE]
+    def get_tile(self): #works
+        return lvl.map[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE]
 
     def place(self):
-        level.tiles[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE] = self.selected_tile
+        lvl.map[self.last_pos[1]//TILE_SIZE][self.last_pos[0]//TILE_SIZE] = self.selected_tile
 
     def click(self, pos):
         self.last_pos = pos
@@ -79,6 +79,7 @@ class Level:
     def draw_level(self):
         print(self.map) # just for testing
 
+
 class Loader:
     def __init__(self):
         self.lNum = 0
@@ -97,9 +98,11 @@ class Loader:
             map[i] = lines[i].split(" ")
         return Level(map)
 
+
+load = Loader()
+lvl = load.load_level(0) # 0.txt is just a dummy for testing
+player = Player()
 while True:
-    load = Loader()
-    lvl = load.load_level(0) # 0.txt is just a dummy for testing
     lvl.draw_level() # only here to test that the file was parsed properly
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
