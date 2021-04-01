@@ -61,7 +61,7 @@ class Extractor(Tile):
     def tick(self):
         # adds an item based on resources
         super(Extractor, self).tick()
-        # TODO implement this
+        self.items.append(Item(self.resource))
 
 
 class Manufacturer(Tile):
@@ -121,10 +121,6 @@ class Splitter(Tile):
             temp.direction = direction.rotate(90 if self.split_bool else 270)
             temp.moved = True
             level.tile_array[self.pos[0] + temp.direction.x][self.pos[1] + temp.direction.y].items.append(temp)
-
-
-
-
 
 
 level = None  # Level class, overwritten when the loader is called
