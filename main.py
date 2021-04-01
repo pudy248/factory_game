@@ -13,14 +13,12 @@ FPS = 60
 TILE_SIZE = 50  # dimensions of each tile in pixels
 #####################
 
-
 class Item:
     def __init__(self, name):
         self.name = name
         self.image = None
         self.direction = [0, 0]
         self.moved = False
-
 
 class Tile:
     def __init__(self, pos):
@@ -54,20 +52,21 @@ class Tile:
 class Level:
     def __init__(self, tMap):
         self.map = tMap
+        self.side = len(self.map)
 
     def world_tick(self):
-        x = 4  # placeholder
+        for tiley in range(self.side):
+            for tilex in range(self.side):
+                self.map[tiley][tilex].tick()
 
     def draw_level(self):
-        side = len(self.map)
-        for tiley in range(side):
-            for tilex in range(side):
+        for tiley in range(self.side):
+            for tilex in range(self.side):
                 self.map[tiley][tilex].draw()
 
 class Loader:
     def __init__(self):
         self.lNum = 0
-
 
     def load_level(self, n):
         self.lNum = n
@@ -105,7 +104,6 @@ class Extractor(Tile):
         # adds an item based on resources
         super(Extractor, self).tick()
 
-
 class Manufacturer(Tile):
     def __init__(self, pos):
         super().__init__(pos)
@@ -114,7 +112,6 @@ class Manufacturer(Tile):
     def tick(self):
         # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
         super(Manufacturer, self).tick()
-
 
 level = None  # Level class, overwritten when the loader is called
 
