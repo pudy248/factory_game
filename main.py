@@ -65,7 +65,8 @@ class Loader:
             tMap.append([])
         for i in range(len(tMap)):
             tMap[i] = lines[i].split(" ")
-        self.convert(tMap)
+        lvl = self.convert(tMap)
+        return lvl
 
     def convert(self, tMap):
         side = len(tMap)
