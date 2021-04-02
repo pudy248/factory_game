@@ -12,7 +12,7 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
 #####CONSTANTS#####
 FPS = 60
-TILE_SIZE = 50  # dimensions of each tile in pixels
+TILE_SIZE = 100  # dimensions of each tile in pixels
 #####################
 
 class Item:
@@ -31,7 +31,8 @@ class Tile:
         self.items = []
 
     def draw(self):
-        SURF.blit(pg.transform.rotate(self.image, 180 if self.direction[0] == -1 else (180 - 90 * self.direction[1])), (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
+        SURF.blit(pg.transform.rotate(self.image, 180 if self.direction[0] == -1 else (180 - 90 * self.direction[1])),
+                  (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
 
     def tick(self):
         # Every tile has the ability to move items
@@ -60,6 +61,7 @@ class Level:
         for tiley in range(self.side):
             for tilex in range(self.side):
                 self.map[tiley][tilex].tick()
+        # update moved status of items
 
     def draw_level(self):
         for tiley in range(self.side):
@@ -86,6 +88,7 @@ class Loader:
         return lvl
 
     def convert(self, tMap):
+        # takes array of strings and converts to level classes
         side = len(tMap)
         newMap = []
         for i in range(side):
@@ -93,7 +96,7 @@ class Loader:
         for y in range(side):
             for x in range(side):
                 pos = [y, x]
-                print(pos)
+                # implement "if tMap[y][x] == (keyword), newMap[y][x] = (specific tile subclass)(pos)"
                 newMap[y][x] = Tile(pos)
         return Level(newMap)
 
@@ -105,6 +108,7 @@ class Extractor(Tile):
     def tick(self):
         # adds an item based on resources
         super(Extractor, self).tick()
+        self.items.append(Item(self.resource))
 
 class Manufacturer(Tile):
     def __init__(self, pos):
@@ -112,9 +116,8 @@ class Manufacturer(Tile):
         self.type = "Manufacturer"
 
     def tick(self):
-        # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
+        # if Recipe Collection class says that the items in self.items can be made into a recipe, consumes them and outputs the result
         super(Manufacturer, self).tick()
-
 
 load = Loader()
 level = None  # Level class, overwritten when the loader is called
