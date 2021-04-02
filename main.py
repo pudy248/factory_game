@@ -79,6 +79,10 @@ class Player:
 
     def select(self, key):
         if key == pg.K_1:
+            self.selected_tile = Extractor(self.last_pos)
+        elif key == pg.K_2:
+            self.selected_tile = Manufacturer(self.last_pos)
+        elif key == pg.K_3:
             self.selected_tile = Tile(self.last_pos)
 
 class Extractor(Tile):
