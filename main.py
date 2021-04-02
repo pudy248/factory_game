@@ -123,13 +123,7 @@ class Splitter(Tile):
             level.tile_array[self.pos[0] + temp.direction.x][self.pos[1] + temp.direction.y].items.append(temp)
 
 
-level = None  # Level class, overwritten when the loader is called
-
 while True:
-    tile = Belt((1, 1))
-    tile.direction = pg.Vector2([0, 1])
-    tile.items.append(Item("Iron"))
-    tile.draw()
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
