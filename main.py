@@ -1,5 +1,7 @@
+import os
+import sys
+
 import pygame as pg
-import sys, os
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pg.init()
@@ -113,6 +115,8 @@ class Manufacturer(Tile):
         # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
         super(Manufacturer, self).tick()
 
+
+load = Loader()
 level = None  # Level class, overwritten when the loader is called
 
 while True:
