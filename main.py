@@ -17,7 +17,7 @@ TILE_SIZE = 100  # dimensions of each tile in pixels
 class Item:
     def __init__(self, name):
         self.name = name
-        self.image = pg.image.load("New Piskel-1.png.png")
+        self.image = pg.image.load("sprites\\tile_conveyor.png")
         self.direction = pg.Vector2([0, 0])
         self.moved = False
 
