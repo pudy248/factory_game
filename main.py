@@ -9,7 +9,7 @@ H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
 #####CONSTANTS#####
-FPS = 60
+FPS = 5
 TILE_SIZE = 100  # dimensions of each tile in pixels
 #####################
 
@@ -17,16 +17,16 @@ TILE_SIZE = 100  # dimensions of each tile in pixels
 class Item:
     def __init__(self, name):
         self.name = name
-        self.image = pg.image.load("sprites\\tile_conveyor.png")
-        self.direction = pg.Vector2([0, 0])
+        self.image = pg.image.load("sprites\\tile_grass.png")
+        self.direction = pg.Vector2([0, 1])
         self.moved = False
 
 
 class Tile:
-    def __init__(self, pos):
+    def __init__(self, pos, angle):
         self.pos = pos
-        self.direction = pg.Vector2([0, 1])
-        self.image = pg.transform.scale(pg.image.load("pacman.png"), (TILE_SIZE, TILE_SIZE))
+        self.direction = pg.Vector2([1, 0]).rotate(angle)
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE))
         self.resource = "None"  # None, Iron, Wood, Coal, Oil, Out of Bounds
         self.type = "Tile"
         self.items = []
@@ -36,14 +36,19 @@ class Tile:
 
     def tick(self):
         # Every tile has the ability to move items
-        for i in range(len(self.items)):
+        print("1", self.items, self.pos)
+        i = 0
+        while i < len(self.items):
             if self.items[i].moved:
-                continue
-            temp = self.items.pop(i)
-            i -= 1
-            temp.direction = self.direction
-            temp.moved = True
-            level.tile_array[self.pos[0] + self.direction.x][self.pos[1] + self.direction.y].items.append(temp)
+                i += 1
+            else:
+                temp = self.items.pop(i)
+                print("2", self.items)
+                temp.direction = self.direction
+                temp.moved = True
+                level.tile_array[int(self.pos[0] + self.direction.x)][int(self.pos[1] + self.direction.y)].items.append(temp)
+                print("3", self.items)
+        print("end")
 
     def is_open(self, type):
         if self.resource == "Out of Bounds":
@@ -54,8 +59,8 @@ class Tile:
 
 
 class Extractor(Tile):
-    def __init__(self, pos):
-        super().__init__(pos)
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
         self.type = "Extractor"
 
     def tick(self):
@@ -65,8 +70,8 @@ class Extractor(Tile):
 
 
 class Manufacturer(Tile):
-    def __init__(self, pos):
-        super().__init__(pos)
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
         self.type = "Manufacturer"
 
     def tick(self):
@@ -76,8 +81,8 @@ class Manufacturer(Tile):
 
 
 class Belt(Tile):
-    def __init__(self, pos):
-        super().__init__(pos)
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
         self.type = "Belt"
 
     def draw(self):
@@ -88,42 +93,67 @@ class Belt(Tile):
 
 
 class Intersection(Tile):
-    def __init__(self, pos):
-        super().__init__(pos)
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
         self.type = "Intersection"
 
     def tick(self):
         # Respects item direction
-        for i in range(len(self.items)):
+        i = 0
+        while i < len(self.items):
             if self.items[i].moved:
-                continue
-            temp = self.items.pop(i)
-            i -= 1
-            temp.moved = True
-            level.tile_array[self.pos[0] + temp.direction.x][self.pos[1] + temp.direction.y].items.append(temp)
+                i += 1
+            else:
+                temp = self.items.pop(i)
+                temp.moved = True
+                level.tile_array[int(self.pos[0] + temp.direction.x)][int(self.pos[1] + temp.direction.y)].items.append(temp)
 
 
 class Splitter(Tile):
-    def __init__(self, pos):
-        super().__init__(pos)
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
 
     def tick(self):
         # Alternates between left and right
-        for i in range(len(self.items)):
+        i = 0
+        while i > len(self.items):
             if self.items[i].moved:
-                continue
-            self.split_bool = not self.split_bool
-            temp = self.items.pop(i)
-            i -= 1
-            direction = pg.Vector2(self.direction[0], self.direction[1])
-            temp.direction = direction.rotate(90 if self.split_bool else 270)
-            temp.moved = True
-            level.tile_array[self.pos[0] + temp.direction.x][self.pos[1] + temp.direction.y].items.append(temp)
+                i += 1
+            else:
+                self.split_bool = not self.split_bool
+                temp = self.items.pop(i)
+                direction = pg.Vector2(self.direction[0], self.direction[1])
+                temp.direction = direction.rotate(90 if self.split_bool else 270)
+                temp.moved = True
+                level.tile_array[int(self.pos[0] + temp.direction.x)][int(self.pos[1] + temp.direction.y)].items.append(temp)
+
+
+class Level:
+    def __init__(self):
+        self.tile_array = [
+            [Belt([0, 0], 270), Belt([0, 1], 90)]
+        ]
+"""
+[None, Belt([0, 1], 0), None],
+            [Belt([1, 0], 270), Belt([1, 1], 0), Belt([1, 2], 90)],
+            [None, Belt([2, 1], 180), None],"""
+level = Level()
 
 
 while True:
+    level.tile_array[0][1].items.append(Item("Iron"))
+    for r in level.tile_array:
+        for t in r:
+            if t is not None:
+                for i in t.items:
+                    i.moved = False
+    for r in level.tile_array:
+        for t in r:
+            if t is not None:
+                #t.tick()
+                t.draw()
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
