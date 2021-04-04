@@ -14,6 +14,58 @@ TILE_SIZE = 100  # dimensions of each tile in pixels
 #####################
 
 
+class Level:
+    def __init__(self, tMap):
+        self.tile_array = tMap
+        self.side = len(self.tile_array)
+
+    def world_tick(self):
+        for tiley in range(self.side):
+            for tilex in range(self.side):
+                for i in self.tile_array[tiley][tilex].items:
+                    i.moved = False
+        for tiley in range(self.side):
+            for tilex in range(self.side):
+                self.tile_array[tiley][tilex].tick()
+
+    def draw_level(self):
+        for tiley in range(self.side):
+            for tilex in range(self.side):
+                self.tile_array[tiley][tilex].draw()
+
+
+class Loader:
+    def __init__(self):
+        self.lNum = 0
+
+    def load_level(self, n):
+        self.lNum = n
+        text = 'levels/' + str(n) + '.txt'
+        lines = []
+        tMap = []
+        with open(text, 'rt') as myfile:
+            for line in myfile:
+                lines.append(line.rstrip(" \n"))
+        for i in range(len(lines)):
+            tMap.append([])
+        for i in range(len(tMap)):
+            tMap[i] = lines[i].split(" ")
+        lvl = self.convert(tMap)
+        return lvl
+
+    def convert(self, tMap):
+        side = len(tMap)
+        newMap = []
+        for i in range(side):
+            newMap.append([Tile([0, 0])] * side)
+        for y in range(side):
+            for x in range(side):
+                pos = [y, x]
+                print(pos)
+                newMap[y][x] = Tile(pos)
+        return Level(newMap)
+
+
 class Item:
     def __init__(self, name):
         self.name = name
