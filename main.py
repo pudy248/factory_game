@@ -9,8 +9,8 @@ H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
 #####CONSTANTS#####
-FPS = 60
-TILE_SIZE = 50  # dimensions of each tile in pixels
+FPS = 5
+TILE_SIZE = 100  # dimensions of each tile in pixels
 #####################
 
 
@@ -57,45 +57,50 @@ class Loader:
         side = len(tMap)
         newMap = []
         for i in range(side):
-            newMap.append([Tile([0, 0])] * side)
+            newMap.append([Tile([0, 0], 0)] * side)
         for y in range(side):
             for x in range(side):
                 pos = [y, x]
                 print(pos)
-                newMap[y][x] = Tile(pos)
+                newMap[y][x] = Tile(pos, 0)
         return Level(newMap)
 
 
 class Item:
     def __init__(self, name):
         self.name = name
-        self.image = None
-        self.direction = [0, 0]
+        self.image = pg.image.load("sprites\\tile_grass.png")
+        self.direction = pg.Vector2([0, 1])
         self.moved = False
 
 
 class Tile:
-    def __init__(self, pos):
+    def __init__(self, pos, angle):
         self.pos = pos
-        self.direction = [1, 0]
-        self.image = pg.transform.scale(pg.image.load("pacman.png"), (TILE_SIZE, TILE_SIZE))
+        self.direction = pg.Vector2([1, 0]).rotate(angle)
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE))
         self.resource = "None"  # None, Iron, Wood, Coal, Oil, Out of Bounds
         self.type = "Tile"
         self.items = []
 
     def draw(self):
-        SURF.blit(pg.transform.rotate(self.image, 180 if self.direction[0] == -1 else (180 - 90 * self.direction[1])), (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
+        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))), (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
 
     def tick(self):
         # Every tile has the ability to move items
-        for i in range(len(self.items)):
+        print("1", self.items, self.pos)
+        i = 0
+        while i < len(self.items):
             if self.items[i].moved:
-                continue
-            temp = self.items.pop(i)
-            i -= 1
-            temp.direction = self.direction
-            temp.moved = True
-            level.tile_array[self.pos[0] + self.direction[0]][self.pos[1] + self.direction[1]].items.append(temp)
+                i += 1
+            else:
+                temp = self.items.pop(i)
+                print("2", self.items)
+                temp.direction = self.direction
+                temp.moved = True
+                level.tile_array[int(self.pos[0] + self.direction.x)][int(self.pos[1] + self.direction.y)].items.append(temp)
+                print("3", self.items)
+        print("end")
 
     def is_open(self, type):
         if self.resource == "Out of Bounds":
@@ -106,26 +111,76 @@ class Tile:
 
 
 class Extractor(Tile):
-    def __init__(self, pos):
-        super().__init__(pos)
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
         self.type = "Extractor"
 
     def tick(self):
         # adds an item based on resources
         super(Extractor, self).tick()
+        self.items.append(Item(self.resource))
 
 
 class Manufacturer(Tile):
-    def __init__(self, pos):
-        super().__init__(pos)
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
         self.type = "Manufacturer"
 
     def tick(self):
         # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
         super(Manufacturer, self).tick()
+        # TODO implement this
 
 
-level = None  # Level class, overwritten when the loader is called
+class Belt(Tile):
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
+        self.type = "Belt"
+
+    def draw(self):
+        super(Belt, self).draw()
+        if len(self.items) > 0:
+            img = pg.transform.scale(self.items[0].image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
+            SURF.blit(img, (self.pos[0] * TILE_SIZE + TILE_SIZE / 4, self.pos[1] * TILE_SIZE + TILE_SIZE / 4))
+
+
+class Intersection(Tile):
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
+        self.type = "Intersection"
+
+    def tick(self):
+        # Respects item direction
+        i = 0
+        while i < len(self.items):
+            if self.items[i].moved:
+                i += 1
+            else:
+                temp = self.items.pop(i)
+                temp.moved = True
+                level.tile_array[int(self.pos[0] + temp.direction.x)][int(self.pos[1] + temp.direction.y)].items.append(temp)
+
+
+class Splitter(Tile):
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
+        self.type = "Splitter"
+        self.split_bool = False  # False = right, True = left
+
+    def tick(self):
+        # Alternates between left and right
+        i = 0
+        while i > len(self.items):
+            if self.items[i].moved:
+                i += 1
+            else:
+                self.split_bool = not self.split_bool
+                temp = self.items.pop(i)
+                direction = pg.Vector2(self.direction[0], self.direction[1])
+                temp.direction = direction.rotate(90 if self.split_bool else 270)
+                temp.moved = True
+                level.tile_array[int(self.pos[0] + temp.direction.x)][int(self.pos[1] + temp.direction.y)].items.append(temp)
+
 
 while True:
     for event in pg.event.get():
