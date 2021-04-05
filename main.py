@@ -57,12 +57,12 @@ class Loader:
         side = len(tMap)
         newMap = []
         for i in range(side):
-            newMap.append([Tile([0, 0])] * side)
+            newMap.append([Tile([0, 0], 0)] * side)
         for y in range(side):
             for x in range(side):
                 pos = [y, x]
                 print(pos)
-                newMap[y][x] = Tile(pos)
+                newMap[y][x] = Tile(pos, 0)
         return Level(newMap)
 
 
@@ -180,18 +180,6 @@ class Splitter(Tile):
                 temp.direction = direction.rotate(90 if self.split_bool else 270)
                 temp.moved = True
                 level.tile_array[int(self.pos[0] + temp.direction.x)][int(self.pos[1] + temp.direction.y)].items.append(temp)
-
-
-class Level:
-    def __init__(self):
-        self.tile_array = [
-            [Belt([0, 0], 270), Belt([0, 1], 90)]
-        ]
-"""
-[None, Belt([0, 1], 0), None],
-            [Belt([1, 0], 270), Belt([1, 1], 0), Belt([1, 2], 90)],
-            [None, Belt([2, 1], 180), None],"""
-level = Level()
 
 
 while True:
