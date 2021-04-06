@@ -1,5 +1,5 @@
 import pygame as pg
-import sys, os
+import sys, os, time
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pg.init()
@@ -9,8 +9,9 @@ H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
 #####CONSTANTS#####
-FPS = 5
+FPS = 60
 TILE_SIZE = 100  # dimensions of each tile in pixels
+TICK_RATE = 10  # ticks per second
 #####################
 
 
@@ -60,9 +61,14 @@ class Loader:
             newMap.append([Tile([0, 0], 0)] * side)
         for y in range(side):
             for x in range(side):
-                pos = [y, x]
-                print(pos)
-                newMap[y][x] = Tile(pos, 0)
+                pos = [x, y]
+                str = tMap[y][x]
+                if str == '+':
+                    newMap[y][x] = Intersection(pos, 0)
+                    newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE))
+                else:
+                    angle = 0 if str == '>' else (90 if str == '^' else (180 if str == '<' else 270))
+                    newMap[y][x] = Belt(pos, angle)
         return Level(newMap)
 
 
@@ -87,25 +93,22 @@ class Tile:
         SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))), (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
 
     def tick(self):
-        # Every tile has the ability to move items
-        print("1", self.items, self.pos)
-        i = 0
-        while i < len(self.items):
-            if self.items[i].moved:
-                i += 1
-            else:
-                temp = self.items.pop(i)
-                print("2", self.items)
-                temp.direction = self.direction
-                temp.moved = True
-                level.tile_array[int(self.pos[0] + self.direction.x)][int(self.pos[1] + self.direction.y)].items.append(temp)
-                print("3", self.items)
-        print("end")
+        if self.type != "Tile":
+            i = 0
+            while i < len(self.items):
+                if self.items[i].moved:
+                    i += 1
+                else:
+                    temp = self.items.pop(i)
+                    temp.direction = self.direction
+                    temp.moved = True
+                    level.tile_array[int(self.pos[1] - self.direction.y)][int(self.pos[0] + self.direction.x)].items.append(temp)
+
 
     def is_open(self, type):
         if self.resource == "Out of Bounds":
             return False
-        elif self.resource is not None and type != "Extractor":
+        elif self.resource != "None" and type != "Extractor":
             return False
         return True
 
@@ -144,7 +147,7 @@ class Belt(Tile):
             SURF.blit(img, (self.pos[0] * TILE_SIZE + TILE_SIZE / 4, self.pos[1] * TILE_SIZE + TILE_SIZE / 4))
 
 
-class Intersection(Tile):
+class Intersection(Belt):
     def __init__(self, pos, angle):
         super().__init__(pos, angle)
         self.type = "Intersection"
@@ -158,10 +161,10 @@ class Intersection(Tile):
             else:
                 temp = self.items.pop(i)
                 temp.moved = True
-                level.tile_array[int(self.pos[0] + temp.direction.x)][int(self.pos[1] + temp.direction.y)].items.append(temp)
+                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
 
 
-class Splitter(Tile):
+class Splitter(Belt):
     def __init__(self, pos, angle):
         super().__init__(pos, angle)
         self.type = "Splitter"
@@ -169,6 +172,7 @@ class Splitter(Tile):
 
     def tick(self):
         # Alternates between left and right
+        # TODO doesn't work for some reason
         i = 0
         while i > len(self.items):
             if self.items[i].moved:
@@ -176,24 +180,23 @@ class Splitter(Tile):
             else:
                 self.split_bool = not self.split_bool
                 temp = self.items.pop(i)
-                direction = pg.Vector2(self.direction[0], self.direction[1])
-                temp.direction = direction.rotate(90 if self.split_bool else 270)
+                temp.direction = self.direction.rotate(90 if self.split_bool else 270)
                 temp.moved = True
-                level.tile_array[int(self.pos[0] + temp.direction.x)][int(self.pos[1] + temp.direction.y)].items.append(temp)
+                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
 
 
+t  = time.perf_counter()
+dt = 0
+level = Loader().load_level(0)
+level.tile_array[0][0].items.append(Item("Iron"))
+level.tile_array[1][0].items.append(Item("Iron"))
 while True:
-    level.tile_array[0][1].items.append(Item("Iron"))
-    for r in level.tile_array:
-        for t in r:
-            if t is not None:
-                for i in t.items:
-                    i.moved = False
-    for r in level.tile_array:
-        for t in r:
-            if t is not None:
-                #t.tick()
-                t.draw()
+    dt += time.perf_counter() - t
+    t = time.perf_counter()
+    if dt > 1 / TICK_RATE:
+        level.world_tick()
+        dt -= 1 / TICK_RATE
+    level.draw_level()
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
