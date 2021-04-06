@@ -62,7 +62,7 @@ class Loader:
             newMap.append([Tile([0, 0], 0)] * side)
         for y in range(side):
             for x in range(side):
-                pos = [y, x]
+                pos = [x, y]
                 print(pos)
                 newMap[y][x] = Tile(pos, 0)
         return Level(newMap)
@@ -133,7 +133,6 @@ class Manufacturer(Tile):
     def tick(self):
         # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
         super(Manufacturer, self).tick()
-        # TODO implement this
 
 
 class Belt(Tile):
