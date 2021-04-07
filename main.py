@@ -11,7 +11,7 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 #####CONSTANTS#####
 FPS = 60
 TILE_SIZE = 100  # dimensions of each tile in pixels
-TICK_RATE = 1  # ticks per second
+TICK_RATE = 2  # ticks per second
 #####################
 
 
@@ -25,6 +25,10 @@ class Level:
             for tilex in range(self.side):
                 for i in self.tile_array[tiley][tilex].items:
                     i.moved = False
+                    if self.tile_array[tiley][tilex].type == "Splitter":
+                        i.direction = self.tile_array[tiley][tilex].direction.rotate(90 if self.tile_array[tiley][tilex].split_bool else 270)
+                    else:
+                        i.direction = self.tile_array[tiley][tilex].direction
         for tiley in range(self.side):
             for tilex in range(self.side):
                 self.tile_array[tiley][tilex].tick()
@@ -83,7 +87,7 @@ class Item:
         self.name = name
         self.image = pg.image.load("sprites\\tile_grass.png")
         self.direction = pg.Vector2([0, 1])
-        self.moved = False
+        self.moved = True
         self.offset = 0
 
 
@@ -109,9 +113,7 @@ class Tile:
                     temp = self.items.pop(i)
                     temp.moved = True
                     temp.offset -= 1
-                    nxt_tile = level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)]
-                    nxt_tile.items.append(temp)
-                    nxt_tile.items[-1].direction = nxt_tile.direction
+                    level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
                 else:
                     i += 1
 
@@ -159,7 +161,6 @@ class Intersection(Belt):
         self.type = "Intersection"
 
     def tick(self):
-        # Respects item direction
         for i in self.items:
             i.offset += TICK_RATE / FPS
         i = 0
@@ -192,19 +193,17 @@ class Splitter(Belt):
 
                 temp.moved = True
                 temp.offset -= 1
-                nxt_tile = level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)]
-                nxt_tile.items.append(temp)
-                nxt_tile.items[-1].direction = nxt_tile.direction.rotate(90 if self.split_bool else 270)
+                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
             else:
                 i += 1
 
 
-print(TICK_RATE / FPS)
 level = Loader().load_level(0)
 level.tile_array[0][0].items.append(Item("Iron"))
-level.tile_array[1][0].items.append(Item("Iron"))
 while True:
     level.world_tick()
+
+    SURF.fill((0, 0, 0))
     level.draw_level()
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
