@@ -78,6 +78,7 @@ class Item:
         self.image = pg.image.load("sprites\\tile_grass.png")
         self.direction = pg.Vector2([0, 1])
         self.moved = False
+        self.offset = 0
 
 
 class Tile:
@@ -99,10 +100,8 @@ class Tile:
                 if self.items[i].moved:
                     i += 1
                 else:
-                    temp = self.items.pop(i)
-                    temp.direction = self.direction
-                    temp.moved = True
-                    level.tile_array[int(self.pos[1] - self.direction.y)][int(self.pos[0] + self.direction.x)].items.append(temp)
+                    i += 1
+
 
 
     def is_open(self, type):
@@ -140,12 +139,6 @@ class Belt(Tile):
         super().__init__(pos, angle)
         self.type = "Belt"
 
-    def draw(self):
-        super(Belt, self).draw()
-        if len(self.items) > 0:
-            img = pg.transform.scale(self.items[0].image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
-            SURF.blit(img, (self.pos[0] * TILE_SIZE + TILE_SIZE / 4, self.pos[1] * TILE_SIZE + TILE_SIZE / 4))
-
 
 class Intersection(Belt):
     def __init__(self, pos, angle):
@@ -159,9 +152,7 @@ class Intersection(Belt):
             if self.items[i].moved:
                 i += 1
             else:
-                temp = self.items.pop(i)
-                temp.moved = True
-                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
+                i += 1
 
 
 class Splitter(Belt):
@@ -178,11 +169,8 @@ class Splitter(Belt):
             if self.items[i].moved:
                 i += 1
             else:
-                self.split_bool = not self.split_bool
-                temp = self.items.pop(i)
-                temp.direction = self.direction.rotate(90 if self.split_bool else 270)
-                temp.moved = True
-                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
+                i += 1
+
 
 
 t  = time.perf_counter()
@@ -191,11 +179,7 @@ level = Loader().load_level(0)
 level.tile_array[0][0].items.append(Item("Iron"))
 level.tile_array[1][0].items.append(Item("Iron"))
 while True:
-    dt += time.perf_counter() - t
-    t = time.perf_counter()
-    if dt > 1 / TICK_RATE:
-        level.world_tick()
-        dt -= 1 / TICK_RATE
+    level.world_tick()
     level.draw_level()
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
