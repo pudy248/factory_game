@@ -60,7 +60,7 @@ class Loader:
             newMap.append([Tile([0, 0], 0)] * side)
         for y in range(side):
             for x in range(side):
-                pos = [y, x]
+                pos = [x, y]
                 print(pos)
                 newMap[y][x] = Tile(pos, 0)
         return Level(newMap)
@@ -82,6 +82,9 @@ class Tile:
         self.resource = "None"  # None, Iron, Wood, Coal, Oil, Out of Bounds
         self.type = "Tile"
         self.items = []
+
+    def __str__(self):
+        return str(self.type) + ": " + str(self.pos)
 
     def draw(self):
         SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))), (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
@@ -105,21 +108,69 @@ class Tile:
     def is_open(self, type):
         if self.resource == "Out of Bounds":
             return False
-        elif self.resource is not None and type != "Extractor":
+        elif self.resource is not "None" and type != "Extractor":
             return False
         return True
 
+
+class Player:
+    def __init__(self):
+        self.selected_tile = False
+        self.last_pos = [0, 0]
+
+    def is_in_level(self):  # Detects if pos is within the level
+        return self.last_pos[0] < TILE_SIZE * len(level.tile_array[0]) and self.last_pos[1] < TILE_SIZE * len(level.tile_array)
+
+    def can_place(self):  # should work
+        return self.selected_tile and self.get_tile().is_open(self.selected_tile)
+
+    def get_tile(self):  # works
+        return level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE]
+
+    def place(self):  # works
+        if self.selected_tile == "Extractor":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Extractor([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Manufacturer":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Manufacturer([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Belt":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Belt([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Intersection":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Intersection([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Splitter":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Splitter([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Tile":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Tile([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+
+    def click(self, pos):
+        self.last_pos = pos
+        if self.is_in_level():
+            if self.can_place():
+                self.place()
+
+    def select(self, key):
+        if key == pg.K_1:
+            self.selected_tile = "Extractor"
+        elif key == pg.K_2:
+            self.selected_tile = "Manufacturer"
+        elif key == pg.K_3:
+            self.selected_tile = "Belt"
+        elif key == pg.K_4:
+            self.selected_tile = "Intersection"
+        elif key == pg.K_4:
+            self.selected_tile = "Splitter"
+        elif key == pg.K_4:
+            self.selected_tile = "Tile"
 
 class Extractor(Tile):
     def __init__(self, pos, angle):
         super().__init__(pos, angle)
         self.type = "Extractor"
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
 
     def tick(self):
         # adds an item based on resources
         super(Extractor, self).tick()
         self.items.append(Item(self.resource))
-
 
 class Manufacturer(Tile):
     def __init__(self, pos, angle):
@@ -166,7 +217,6 @@ class Splitter(Tile):
         super().__init__(pos, angle)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
-
     def tick(self):
         # Alternates between left and right
         i = 0
@@ -180,12 +230,21 @@ class Splitter(Tile):
                 temp.direction = direction.rotate(90 if self.split_bool else 270)
                 temp.moved = True
                 level.tile_array[int(self.pos[0] + temp.direction.x)][int(self.pos[1] + temp.direction.y)].items.append(temp)
+level = None  # Level class, overwritten when the loader is called
 
-
+load = Loader()
+level = load.load_level(0) # 0.txt is just a dummy for testing
+player = Player()
 while True:
+    SURF.fill((0, 0, 0))
+    level.draw_level() # only here to test that the file was parsed properly
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
             sys.exit()
+        elif event.type == pg.KEYDOWN:
+            player.select(event.key)
+        elif event.type == pg.MOUSEBUTTONUP:
+            player.click(event.pos)
     pg.display.update()
     clock.tick(FPS)
