@@ -32,7 +32,6 @@ class Level:
         for tiley in range(self.side):
             for tilex in range(self.side):
                 self.tile_array[tiley][tilex].draw()
-                print(self.tile_array[tiley][tilex].__str__())
 
 
 class Loader:
@@ -61,7 +60,7 @@ class Loader:
             newMap.append([Tile([0, 0], 0)] * side)
         for y in range(side):
             for x in range(side):
-                pos = [y, x]
+                pos = [x, y]
                 print(pos)
                 newMap[y][x] = Tile(pos, 0)
         return Level(newMap)
@@ -109,7 +108,7 @@ class Tile:
     def is_open(self, type):
         if self.resource == "Out of Bounds":
             return False
-        elif self.resource is not None and type != "Extractor":
+        elif self.resource is not "None" and type != "Extractor":
             return False
         return True
 
@@ -129,16 +128,18 @@ class Player:
         return level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE]
 
     def place(self):  # works
-        print((self.last_pos[0]//TILE_SIZE)*TILE_SIZE)
-        print((self.last_pos[1]//TILE_SIZE)*TILE_SIZE)
-        #self.selected_tile.pos = [(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)]
-        print(str(self.last_pos[1]//TILE_SIZE) + ", " + str(self.last_pos[0]//TILE_SIZE))
-        for i in level.tile_array:
-            for j in i:
-                print(j.__str__())
-        print(level.tile_array)
         if self.selected_tile == "Extractor":
             level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Extractor([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Manufacturer":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Manufacturer([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Belt":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Belt([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Intersection":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Intersection([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Splitter":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Splitter([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+        elif self.selected_tile == "Tile":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Tile([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
 
     def click(self, pos):
         self.last_pos = pos
@@ -150,9 +151,15 @@ class Player:
         if key == pg.K_1:
             self.selected_tile = "Extractor"
         elif key == pg.K_2:
-            self.selected_tile = Manufacturer(self.last_pos, 0)
+            self.selected_tile = "Manufacturer"
         elif key == pg.K_3:
-            self.selected_tile = Tile(self.last_pos, 0)
+            self.selected_tile = "Belt"
+        elif key == pg.K_4:
+            self.selected_tile = "Intersection"
+        elif key == pg.K_4:
+            self.selected_tile = "Splitter"
+        elif key == pg.K_4:
+            self.selected_tile = "Tile"
 
 class Extractor(Tile):
     def __init__(self, pos, angle):
@@ -229,6 +236,7 @@ load = Loader()
 level = load.load_level(0) # 0.txt is just a dummy for testing
 player = Player()
 while True:
+    SURF.fill((0, 0, 0))
     level.draw_level() # only here to test that the file was parsed properly
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
