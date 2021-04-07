@@ -11,7 +11,7 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 #####CONSTANTS#####
 FPS = 60
 TILE_SIZE = 100  # dimensions of each tile in pixels
-TICK_RATE = 10  # ticks per second
+TICK_RATE = 1  # ticks per second
 #####################
 
 
@@ -33,7 +33,13 @@ class Level:
         for tiley in range(self.side):
             for tilex in range(self.side):
                 self.tile_array[tiley][tilex].draw()
-
+        for tiley in range(self.side):
+            for tilex in range(self.side):
+                if self.tile_array[tiley][tilex].type == "Belt" and len(self.tile_array[tiley][tilex].items) > 0:
+                    for i in self.tile_array[tiley][tilex].items:
+                        img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
+                        SURF.blit(img, (self.tile_array[tiley][tilex].pos[0] * TILE_SIZE + TILE_SIZE / 4 +
+                            (i.offset * i.direction[0] * TILE_SIZE), self.tile_array[tiley][tilex].pos[1] * TILE_SIZE + TILE_SIZE / 4 - (i.offset * i.direction[1] * TILE_SIZE)))
 
 class Loader:
     def __init__(self):
@@ -95,10 +101,17 @@ class Tile:
 
     def tick(self):
         if self.type != "Tile":
+            for i in self.items:
+                i.offset += TICK_RATE / FPS
             i = 0
             while i < len(self.items):
-                if self.items[i].moved:
-                    i += 1
+                if not self.items[i].moved and self.items[i].offset > 1:
+                    temp = self.items.pop(i)
+                    temp.moved = True
+                    temp.offset -= 1
+                    nxt_tile = level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)]
+                    nxt_tile.items.append(temp)
+                    nxt_tile.items[-1].direction = nxt_tile.direction
                 else:
                     i += 1
 
@@ -147,10 +160,15 @@ class Intersection(Belt):
 
     def tick(self):
         # Respects item direction
+        for i in self.items:
+            i.offset += TICK_RATE / FPS
         i = 0
         while i < len(self.items):
-            if self.items[i].moved:
-                i += 1
+            if not self.items[i].moved and self.items[i].offset > 1:
+                temp = self.items.pop(i)
+                temp.moved = True
+                temp.offset -= 1
+                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
             else:
                 i += 1
 
@@ -164,17 +182,24 @@ class Splitter(Belt):
     def tick(self):
         # Alternates between left and right
         # TODO doesn't work for some reason
+        for i in self.items:
+            i.offset += TICK_RATE / FPS
         i = 0
         while i > len(self.items):
-            if self.items[i].moved:
-                i += 1
+            if not self.items[i].moved and self.items[i].offset > 1:
+                self.split_bool = not self.split_bool
+                temp = self.items.pop(i)
+
+                temp.moved = True
+                temp.offset -= 1
+                nxt_tile = level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)]
+                nxt_tile.items.append(temp)
+                nxt_tile.items[-1].direction = nxt_tile.direction.rotate(90 if self.split_bool else 270)
             else:
                 i += 1
 
 
-
-t  = time.perf_counter()
-dt = 0
+print(TICK_RATE / FPS)
 level = Loader().load_level(0)
 level.tile_array[0][0].items.append(Item("Iron"))
 level.tile_array[1][0].items.append(Item("Iron"))
