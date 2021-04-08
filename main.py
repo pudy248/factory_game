@@ -26,6 +26,11 @@ class Level:
             for tilex in range(self.side):
                 for i in self.tile_array[tiley][tilex].items:
                     i.moved = False
+                    if self.tile_array[tiley][tilex].type == "Splitter":
+                        i.direction = self.tile_array[tiley][tilex].direction.rotate(
+                            90 if self.tile_array[tiley][tilex].split_bool else 270)
+                    else:
+                        i.direction = self.tile_array[tiley][tilex].direction
         for tiley in range(self.side):
             for tilex in range(self.side):
                 self.tile_array[tiley][tilex].tick()
@@ -34,6 +39,15 @@ class Level:
         for tiley in range(self.side):
             for tilex in range(self.side):
                 self.tile_array[tiley][tilex].draw()
+        for tiley in range(self.side):
+            for tilex in range(self.side):
+                if self.tile_array[tiley][tilex].type == "Belt" and len(self.tile_array[tiley][tilex].items) > 0:
+                    for i in self.tile_array[tiley][tilex].items:
+                        img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
+                        SURF.blit(img, (self.tile_array[tiley][tilex].pos[0] * TILE_SIZE + TILE_SIZE / 4 +
+                                        (i.offset * i.direction[0] * TILE_SIZE),
+                                        self.tile_array[tiley][tilex].pos[1] * TILE_SIZE + TILE_SIZE / 4 - (
+                                                    i.offset * i.direction[1] * TILE_SIZE)))
 
 
 class Loader:
@@ -63,8 +77,14 @@ class Loader:
         for y in range(side):
             for x in range(side):
                 pos = [x, y]
-                print(pos)
-                newMap[y][x] = Tile(pos, 0)
+                str = tMap[y][x]
+                if str == '+':
+                    newMap[y][x] = Intersection(pos, 0)
+                    newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"),
+                                                            (TILE_SIZE, TILE_SIZE))
+                else:
+                    angle = 0 if str == '>' else (90 if str == '^' else (180 if str == '<' else 270))
+                    newMap[y][x] = Belt(pos, angle)
         return Level(newMap)
 
 
