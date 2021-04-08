@@ -112,7 +112,8 @@ class Tile:
                 i.offset += TICK_RATE / FPS
             i = 0
             while i < len(self.items):
-                if not self.items[i].moved and self.items[i].offset > 1:
+                if not self.items[i].moved and self.items[i].offset > 1 and \
+                       -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                     temp = self.items.pop(i)
                     temp.moved = True
                     temp.offset -= 1
@@ -216,7 +217,8 @@ class Intersection(Belt):
             i.offset += TICK_RATE / FPS
         i = 0
         while i < len(self.items):
-            if not self.items[i].moved and self.items[i].offset > 1:
+            if not self.items[i].moved and self.items[i].offset > 1 and \
+                    -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                 temp = self.items.pop(i)
                 temp.moved = True
                 temp.offset -= 1
@@ -232,7 +234,7 @@ class Splitter(Belt):
         self.split_bool = False  # False = right, True = left
     def tick(self):
         # Alternates between left and right
-        # TODO doesn't work for some reason
+        # TODO doesn't work for some reason, don't use
         for i in self.items:
             i.offset += TICK_RATE / FPS
         i = 0
@@ -249,6 +251,7 @@ class Splitter(Belt):
 
 load = Loader()
 level = load.load_level(0) # 0.txt is just a dummy for testing
+level.tile_array[0][0].items.append(Item(""))
 player = Player()
 while True:
     level.world_tick()
