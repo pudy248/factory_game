@@ -103,7 +103,11 @@ class Recipe:
             return False
         else:
             for i in inputs:
-                if i not in self.inputs:
+                contained = False
+                for j in self.inputs:
+                    if i.name == j.name:
+                        contained = True
+                if not contained:
                     return False
         return True
 
