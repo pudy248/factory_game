@@ -184,21 +184,37 @@ class Extractor(Tile):
         super().__init__(pos, angle)
         self.type = "Extractor"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
+        self.t = time.perf_counter()
+        self.dt = 0
 
     def tick(self):
         # adds an item based on resources
         super(Extractor, self).tick()
-        self.items.append(Item(self.resource))
+        self.dt += time.perf_counter() - self.t
+        self.t = time.perf_counter()
+        if self.dt > 1 / TICK_RATE:
+            self.items.append(Item(self.resource))
+            self.dt -= 1 / TICK_RATE
 
 class Manufacturer(Tile):
     def __init__(self, pos, angle):
         super().__init__(pos, angle)
         self.type = "Manufacturer"
+        self.t = time.perf_counter()
+        self.dt = 0
 
     def tick(self):
-        # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
+        # adds an item based on resources
+        inputs = []
+        for i in self.items:
+            inputs.append(i.name)
+        recipie = None  # Recipie collection on inputs
+        self.dt += time.perf_counter() - self.t
+        self.t = time.perf_counter()
+        if self.dt > 1 / TICK_RATE:
+            # add outputs from recipie
+            self.dt -= 1 / TICK_RATE
         super(Manufacturer, self).tick()
-        # TODO implement this
 
 
 class Belt(Tile):
