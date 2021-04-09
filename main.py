@@ -105,7 +105,7 @@ class Recipe:
             for i in inputs:
                 contained = False
                 for j in self.inputs:
-                    if i.name == j.name:
+                    if i == j:
                         contained = True
                 if not contained:
                     return False
@@ -288,6 +288,14 @@ class Splitter(Belt):
             else:
                 i += 1
 
+
+rc = Recipe_Collection((Recipe(("Wood", "Iron Ore"), ("Iron Bar")), Recipe(("Natural Gas", "Iron Ore"), ("Iron Bar")),
+                        Recipe(("Coal", "Iron Bar"), ("Steel Bar")), Recipe(("Iron Bar"), ("Iron Tubes")), Recipe(("Iron Tubes"), ("Screws")),
+                        Recipe(("Steel Bar"), ("Steel Tubes")), Recipe(("Steel Bar", "Iron Bar"), ("Alloy Plate")),
+                        Recipe(("Steel Tubes"), ("Springs")), Recipe(("Screws", "Springs"), ("Machine Parts")),
+                        Recipe(("Alloy Plate", "Machine Parts", "Steel Tubes"), ("Engines")), Recipe(("Engines", "Springs", "Coal"), ("Locomotives")),
+                        Recipe(("Engines", "Alloy Plate", "Gasoline"), ("Automobiles")), Recipe(("Steel Tubes", "Plastic"), ("Consumer Goods")),
+                        Recipe(("Oil"), ("Natural Gas", "Petroleum")), Recipe(("Petroleum"), ("Plastic", "Gasoline"))))
 load = Loader()
 level = load.load_level(0) # 0.txt is just a dummy for testing
 level.tile_array[0][0].items.append(Item(""))
