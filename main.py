@@ -295,7 +295,7 @@ rc = Recipe_Collection((Recipe(("Wood", "Iron Ore"), ("Iron Bar")), Recipe(("Nat
                         Recipe(("Steel Tubes"), ("Springs")), Recipe(("Screws", "Springs"), ("Machine Parts")),
                         Recipe(("Alloy Plate", "Machine Parts", "Steel Tubes"), ("Engines")), Recipe(("Engines", "Springs", "Coal"), ("Locomotives")),
                         Recipe(("Engines", "Alloy Plate", "Gasoline"), ("Automobiles")), Recipe(("Steel Tubes", "Plastic"), ("Consumer Goods")),
-                        Recipe(("Oil"), ("Natural Gas", "Petroleum")), Recipe("Petroleum"), ("Plastic", "Gasoline")))
+                        Recipe(("Oil"), ("Natural Gas", "Petroleum")), Recipe(("Petroleum"), ("Plastic", "Gasoline"))))
 load = Loader()
 level = load.load_level(0) # 0.txt is just a dummy for testing
 level.tile_array[0][0].items.append(Item(""))
