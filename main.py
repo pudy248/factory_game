@@ -93,6 +93,37 @@ class Item:
         self.offset = 0
 
 
+class Recipe:
+    def __init__(self, inputs, outputs):
+        self.inputs = inputs
+        self.outputs = outputs
+
+    def check_inputs(self, inputs):
+        if len(inputs) != len(self.inputs):
+            return False
+        else:
+            for i in inputs:
+                contained = False
+                for j in self.inputs:
+                    if i.name == j.name:
+                        contained = True
+                if not contained:
+                    return False
+        return True
+
+
+class Recipe_Collection:
+    def __init__(self, recipes):
+        self.recipes = []
+        self.recipes.extend(recipes)
+
+    def get_recipe(self, inputs):
+        for r in self.recipes:
+            if r.check_inputs(inputs):
+                return r
+        return False
+
+
 class Tile:
     def __init__(self, pos, angle):
         self.pos = pos
