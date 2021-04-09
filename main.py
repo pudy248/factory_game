@@ -179,6 +179,7 @@ class Player:
         elif key == pg.K_4:
             self.selected_tile = "Tile"
 
+
 class Extractor(Tile):
     def __init__(self, pos, angle):
         super().__init__(pos, angle)
@@ -196,6 +197,7 @@ class Extractor(Tile):
             self.items.append(Item(self.resource))
             self.dt -= 1 / TICK_RATE
 
+
 class Manufacturer(Tile):
     def __init__(self, pos, angle):
         super().__init__(pos, angle)
@@ -207,7 +209,8 @@ class Manufacturer(Tile):
         # adds an item based on resources
         inputs = []
         for i in self.items:
-            inputs.append(i.name)
+            if i.name not in inputs:
+                inputs.append(i.name)
         recipie = None  # Recipie collection on inputs
         self.dt += time.perf_counter() - self.t
         self.t = time.perf_counter()
@@ -264,6 +267,25 @@ class Splitter(Belt):
                 level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
             else:
                 i += 1
+
+
+class Void(Tile):
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
+        self.type = "Void"
+
+    def tick(self):
+        self.items = []
+
+
+class Exit(Tile):
+    def __init__(self, pos, angle):
+        super().__init__(pos, angle)
+        self.type = "Void"
+
+    def tick(self):
+        super(Exit, self).tick()
+        #TODO implement this
 
 load = Loader()
 level = load.load_level(0) # 0.txt is just a dummy for testing
