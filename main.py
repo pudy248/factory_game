@@ -76,9 +76,11 @@ class Loader:
                 if str == '+':
                     newMap[y][x] = Intersection(pos, 0)
                     newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE))
-                else:
+                elif str in ["<", ">", "^", "v"]:
                     angle = 0 if str == '>' else (90 if str == '^' else (180 if str == '<' else 270))
                     newMap[y][x] = Belt(pos, angle)
+                else:
+                    newMap[y][x] = Tile(pos, 0)
         return Level(newMap)
 
 
@@ -91,11 +93,42 @@ class Item:
         self.offset = 0
 
 
+class Recipe:
+    def __init__(self, inputs, outputs):
+        self.inputs = inputs
+        self.outputs = outputs
+
+    def check_inputs(self, inputs):
+        if len(inputs) != len(self.inputs):
+            return False
+        else:
+            for i in inputs:
+                contained = False
+                for j in self.inputs:
+                    if i == j:
+                        contained = True
+                if not contained:
+                    return False
+        return True
+
+
+class Recipe_Collection:
+    def __init__(self, recipes):
+        self.recipes = []
+        self.recipes.extend(recipes)
+
+    def get_recipe(self, inputs):
+        for r in self.recipes:
+            if r.check_inputs(inputs):
+                return r
+        return False
+
+
 class Tile:
     def __init__(self, pos, angle):
         self.pos = pos
         self.direction = pg.Vector2([1, 0]).rotate(angle)
-        self.image = pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE))
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
         self.resource = "None"  # None, Iron, Wood, Coal, Oil, Out of Bounds
         self.type = "Tile"
         self.items = []
@@ -134,6 +167,7 @@ class Tile:
 class Player:
     def __init__(self):
         self.selected_tile = False
+        self.tile_angle = 0
         self.last_pos = [0, 0]
 
     def is_in_level(self):  # Detects if pos is within the level
@@ -151,13 +185,13 @@ class Player:
         elif self.selected_tile == "Manufacturer":
             level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Manufacturer([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
         elif self.selected_tile == "Belt":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Belt([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Belt([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle)
         elif self.selected_tile == "Intersection":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Intersection([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Intersection([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle)
         elif self.selected_tile == "Splitter":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Splitter([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Splitter([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle)
         elif self.selected_tile == "Tile":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Tile([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Tile([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle)
 
     def click(self, pos):
         self.last_pos = pos
@@ -174,10 +208,12 @@ class Player:
             self.selected_tile = "Belt"
         elif key == pg.K_4:
             self.selected_tile = "Intersection"
-        elif key == pg.K_4:
+        elif key == pg.K_5:
             self.selected_tile = "Splitter"
-        elif key == pg.K_4:
+        elif key == pg.K_6:
             self.selected_tile = "Tile"
+        elif key == pg.K_r:
+            self.tile_angle = (self.tile_angle - 90) % 360
 
 
 class Extractor(Tile):
@@ -202,6 +238,7 @@ class Manufacturer(Tile):
     def __init__(self, pos, angle):
         super().__init__(pos, angle)
         self.type = "Manufacturer"
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_factory.png"), (TILE_SIZE, TILE_SIZE))
         self.t = time.perf_counter()
         self.dt = 0
 
@@ -224,12 +261,14 @@ class Belt(Tile):
     def __init__(self, pos, angle):
         super().__init__(pos, angle)
         self.type = "Belt"
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE))
 
 
 class Intersection(Belt):
     def __init__(self, pos, angle):
         super().__init__(pos, angle)
         self.type = "Intersection"
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE))
 
     def tick(self):
         for i in self.items:
@@ -287,13 +326,20 @@ class Exit(Tile):
         super(Exit, self).tick()
         #TODO implement this
 
+
+rc = Recipe_Collection((Recipe(("Wood", "Iron Ore"), ("Iron Bar")), Recipe(("Natural Gas", "Iron Ore"), ("Iron Bar")),
+                        Recipe(("Coal", "Iron Bar"), ("Steel Bar")), Recipe(("Iron Bar"), ("Iron Tubes")), Recipe(("Iron Tubes"), ("Screws")),
+                        Recipe(("Steel Bar"), ("Steel Tubes")), Recipe(("Steel Bar", "Iron Bar"), ("Alloy Plate")),
+                        Recipe(("Steel Tubes"), ("Springs")), Recipe(("Screws", "Springs"), ("Machine Parts")),
+                        Recipe(("Alloy Plate", "Machine Parts", "Steel Tubes"), ("Engines")), Recipe(("Engines", "Springs", "Coal"), ("Locomotives")),
+                        Recipe(("Engines", "Alloy Plate", "Gasoline"), ("Automobiles")), Recipe(("Steel Tubes", "Plastic"), ("Consumer Goods")),
+                        Recipe(("Oil"), ("Natural Gas", "Petroleum")), Recipe(("Petroleum"), ("Plastic", "Gasoline"))))
 load = Loader()
 level = load.load_level(0) # 0.txt is just a dummy for testing
 level.tile_array[0][0].items.append(Item(""))
 player = Player()
 while True:
     level.world_tick()
-
     SURF.fill((0, 0, 0))
     level.draw_level()
     for event in pg.event.get():
