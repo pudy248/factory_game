@@ -1,0 +1,7 @@
+E = Exit
+X = out of bounds
+- = empty
+I = iron
+W = wood
+C = coal
+O = oil
