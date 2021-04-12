@@ -125,10 +125,12 @@ class Recipe_Collection:
 
 
 class Tile:
-    def __init__(self, pos, angle):
+    def __init__(self, pos, angle, ghost=False):
         self.pos = pos
         self.direction = pg.Vector2([1, 0]).rotate(angle)
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
+        if ghost:
+            self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
         self.resource = "None"  # None, Iron, Wood, Coal, Oil, Out of Bounds
         self.type = "Tile"
         self.items = []
@@ -166,9 +168,10 @@ class Tile:
 
 class Player:
     def __init__(self):
-        self.selected_tile = False
+        self.selected_tile = "Tile"
         self.tile_angle = 0
         self.last_pos = [0, 0]
+        self.ghost_tile = Tile(self.last_pos, 0)
 
     def is_in_level(self):  # Detects if pos is within the level
         return self.last_pos[0] < TILE_SIZE * len(level.tile_array[0]) and self.last_pos[1] < TILE_SIZE * len(level.tile_array)
@@ -199,6 +202,10 @@ class Player:
             if self.can_place():
                 self.place()
 
+    def move(self, pos):
+        self.last_pos = pos
+        self.ghost_tile = sys.modules[__name__].__getattribute__(self.selected_tile)([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle, True)
+
     def select(self, key):
         if key == pg.K_1:
             self.selected_tile = "Extractor"
@@ -216,10 +223,12 @@ class Player:
             self.tile_angle = (self.tile_angle - 90) % 360
 
 class Extractor(Tile):
-    def __init__(self, pos, angle):
-        super().__init__(pos, angle)
+    def __init__(self, pos, angle, ghost=False):
+        super().__init__(pos, angle, ghost)
         self.type = "Extractor"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
+        if ghost:
+            self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
         # adds an item based on resources
@@ -227,10 +236,12 @@ class Extractor(Tile):
         self.items.append(Item(self.resource))
 
 class Manufacturer(Tile):
-    def __init__(self, pos, angle):
-        super().__init__(pos, angle)
+    def __init__(self, pos, angle, ghost=False):
+        super().__init__(pos, angle, ghost)
         self.type = "Manufacturer"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_factory.png"), (TILE_SIZE, TILE_SIZE))
+        if ghost:
+            self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
         # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
@@ -239,17 +250,21 @@ class Manufacturer(Tile):
 
 
 class Belt(Tile):
-    def __init__(self, pos, angle):
-        super().__init__(pos, angle)
+    def __init__(self, pos, angle, ghost=False):
+        super().__init__(pos, angle, ghost)
         self.type = "Belt"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE))
+        if ghost:
+            self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
 
 class Intersection(Belt):
-    def __init__(self, pos, angle):
-        super().__init__(pos, angle)
+    def __init__(self, pos, angle, ghost=False):
+        super().__init__(pos, angle, ghost)
         self.type = "Intersection"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE))
+        if ghost:
+            self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
         for i in self.items:
@@ -267,8 +282,8 @@ class Intersection(Belt):
 
 
 class Splitter(Belt):
-    def __init__(self, pos, angle):
-        super().__init__(pos, angle)
+    def __init__(self, pos, angle, ghost=False):
+        super().__init__(pos, angle, ghost)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
     def tick(self):
@@ -296,6 +311,7 @@ while True:
     level.world_tick()
     SURF.fill((0, 0, 0))
     level.draw_level()
+    player.ghost_tile.draw()
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
@@ -304,5 +320,6 @@ while True:
             player.select(event.key)
         elif event.type == pg.MOUSEBUTTONUP:
             player.click(event.pos)
+    player.move(pg.mouse.get_pos())
     pg.display.update()
     clock.tick(FPS)
