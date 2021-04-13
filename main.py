@@ -27,6 +27,7 @@ class Level:
                     i.moved = False
                     if self.tile_array[tiley][tilex].type == "Splitter":
                         i.direction = self.tile_array[tiley][tilex].direction.rotate(90 if self.tile_array[tiley][tilex].split_bool else 270)
+                        print(self.tile_array[tiley][tilex].split_bool)
                     else:
                         i.direction = self.tile_array[tiley][tilex].direction
         for tiley in range(self.side):
@@ -39,7 +40,7 @@ class Level:
                 self.tile_array[tiley][tilex].draw()
         for tiley in range(self.side):
             for tilex in range(self.side):
-                if self.tile_array[tiley][tilex].type == "Belt" and len(self.tile_array[tiley][tilex].items) > 0:
+                if self.tile_array[tiley][tilex].type == "Belt" or len(self.tile_array[tiley][tilex].items) > 0:  # change back to and
                     for i in self.tile_array[tiley][tilex].items:
                         img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
                         SURF.blit(img, (self.tile_array[tiley][tilex].pos[0] * TILE_SIZE + TILE_SIZE / 4 +
@@ -87,7 +88,10 @@ class Loader:
 class Item:
     def __init__(self, name):
         self.name = name
-        self.image = pg.image.load("sprites\\tile_grass.png")
+        if os.path.exists("sprites\\" + name + ".png"):
+            self.image = pg.image.load("sprites\\" + name + ".png")
+        else:
+            self.image = pg.image.load("sprites\\tile_grass.png")
         self.direction = pg.Vector2([0, 1])
         self.moved = True
         self.offset = 0
@@ -313,7 +317,7 @@ rc = Recipe_Collection((Recipe(("Wood", "Iron Ore"), ("Iron Bar")), Recipe(("Nat
                         Recipe(("Oil"), ("Natural Gas", "Petroleum")), Recipe(("Petroleum"), ("Plastic", "Gasoline"))))
 load = Loader()
 level = load.load_level(0) # 0.txt is just a dummy for testing
-level.tile_array[0][0].items.append(Item(""))
+level.tile_array[0][0].items.append(Item("Iron Ore"))
 player = Player()
 while True:
     level.world_tick()
