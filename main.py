@@ -102,6 +102,12 @@ class Recipe:
         self.inputs = inputs
         self.outputs = outputs
 
+    def get_outputs(self):
+        temp = []
+        for i in self.outputs:
+            temp.append(Item(i))
+        return temp
+
     def check_inputs(self, inputs):
         if len(inputs) != len(self.inputs):
             return False
@@ -109,7 +115,7 @@ class Recipe:
             for i in inputs:
                 contained = False
                 for j in self.inputs:
-                    if i == j:
+                    if i.name == j:
                         contained = True
                 if not contained:
                     return False
@@ -249,7 +255,17 @@ class Manufacturer(Tile):
 
     def tick(self):
         # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
-        super(Manufacturer, self).tick()
+        #super(Manufacturer, self).tick()
+        if rc.get_recipe(self.items):
+            recipe = rc.get_recipe(self.items)
+            for i in recipe.inputs:
+                for index in range(len(self.items)):
+                    if self.items[index].name == i:
+                        self.items.pop(index)
+                        break
+            self.items.extend(recipe.get_outputs())
+            print(self.items[-1].name)
+
         # TODO implement this
 
 
@@ -308,16 +324,17 @@ class Splitter(Belt):
                 i += 1
 
 
-rc = Recipe_Collection((Recipe(("Wood", "Iron Ore"), ("Iron Bar")), Recipe(("Natural Gas", "Iron Ore"), ("Iron Bar")),
-                        Recipe(("Coal", "Iron Bar"), ("Steel Bar")), Recipe(("Iron Bar"), ("Iron Tubes")), Recipe(("Iron Tubes"), ("Screws")),
-                        Recipe(("Steel Bar"), ("Steel Tubes")), Recipe(("Steel Bar", "Iron Bar"), ("Alloy Plate")),
-                        Recipe(("Steel Tubes"), ("Springs")), Recipe(("Screws", "Springs"), ("Machine Parts")),
-                        Recipe(("Alloy Plate", "Machine Parts", "Steel Tubes"), ("Engines")), Recipe(("Engines", "Springs", "Coal"), ("Locomotives")),
-                        Recipe(("Engines", "Alloy Plate", "Gasoline"), ("Automobiles")), Recipe(("Steel Tubes", "Plastic"), ("Consumer Goods")),
-                        Recipe(("Oil"), ("Natural Gas", "Petroleum")), Recipe(("Petroleum"), ("Plastic", "Gasoline"))))
+rc = Recipe_Collection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
+                        Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Iron Bar"], ["Iron Tubes"]), Recipe(["Iron Tubes"], ["Screws"]),
+                        Recipe(["Steel Bar"], ["Steel Tubes"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
+                        Recipe(["Steel Tubes"], ["Springs"]), Recipe(["Screws", "Springs"], ["Machine Parts"]),
+                        Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]), Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
+                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]), Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
+                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
 level = load.load_level(0) # 0.txt is just a dummy for testing
 level.tile_array[0][0].items.append(Item("Iron Ore"))
+level.tile_array[1][0].items.append(Item("Wood"))
 player = Player()
 while True:
     level.world_tick()
