@@ -117,7 +117,7 @@ class Recipe:
             for i in inputs:
                 contained = False
                 for j in self.inputs:
-                    if i.name == j:
+                    if i.name == j and not i.manufactured:
                         contained = True
                 if not contained:
                     return False
@@ -207,7 +207,7 @@ class Player:
 
     def move(self, pos):
         self.last_pos = pos
-        self.ghost_tile = sys.modules[__name__].__getattribute__(self.selected_tile)([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle, True)
+        self.ghost_tile = sys.modules[__name__].__getattribute__(self.selected_tile)([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle, False, True)
 
     def select(self, key):
         if key == pg.K_1:
