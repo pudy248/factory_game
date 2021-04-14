@@ -8,6 +8,7 @@ W = pg.display.Info().current_w
 H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
+
 #####CONSTANTS#####
 FPS = 60
 TILE_SIZE = 100  # dimensions of each tile in pixels
@@ -69,19 +70,19 @@ class Loader:
         side = len(tMap)
         newMap = []
         for i in range(side):
-            newMap.append([Tile([0, 0], 0)] * side)
+            newMap.append([Tile([0, 0], 0, "None")] * side)
         for y in range(side):
             for x in range(side):
                 pos = [x, y]
                 str = tMap[y][x]
                 if str == '+':
-                    newMap[y][x] = Intersection(pos, 0)
+                    newMap[y][x] = Intersection(pos, 0, "Oil")
                     newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE))
                 elif str in ["<", ">", "^", "v"]:
                     angle = 0 if str == '>' else (90 if str == '^' else (180 if str == '<' else 270))
-                    newMap[y][x] = Belt(pos, angle)
+                    newMap[y][x] = Belt(pos, angle, "Oil")
                 else:
-                    newMap[y][x] = Tile(pos, 0)
+                    newMap[y][x] = Tile(pos, 0, "Oil")
         return Level(newMap)
 
 
@@ -94,6 +95,7 @@ class Item:
             self.image = pg.image.load("sprites\\tile_grass.png")
         self.direction = pg.Vector2([0, 1])
         self.moved = True
+        self.manufactured = False
         self.offset = 0
 
 
@@ -135,13 +137,13 @@ class Recipe_Collection:
 
 
 class Tile:
-    def __init__(self, pos, angle, ghost=False):
+    def __init__(self, pos, angle, resource, ghost=False):
         self.pos = pos
         self.direction = pg.Vector2([1, 0]).rotate(angle)
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
-        self.resource = "None"  # None, Iron, Wood, Coal, Oil, Out of Bounds
+        self.resource = resource  # None, Iron, Wood, Coal, Oil, Out of Bounds
         self.type = "Tile"
         self.items = []
 
@@ -161,6 +163,7 @@ class Tile:
                        -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                     temp = self.items.pop(i)
                     temp.moved = True
+                    temp.manufactured = False
                     temp.offset -= 1
                     level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
                 else:
@@ -169,6 +172,7 @@ class Tile:
 
 
     def is_open(self, type):
+        return True
         if self.resource == "Out of Bounds":
             return False
         elif self.resource != "None" and type != "Extractor":
@@ -181,7 +185,7 @@ class Player:
         self.selected_tile = "Tile"
         self.tile_angle = 0
         self.last_pos = [0, 0]
-        self.ghost_tile = Tile(self.last_pos, 0)
+        self.ghost_tile = Tile(self.last_pos, 0, "None")
 
     def is_in_level(self):  # Detects if pos is within the level
         return self.last_pos[0] < TILE_SIZE * len(level.tile_array[0]) and self.last_pos[1] < TILE_SIZE * len(level.tile_array)
@@ -193,18 +197,7 @@ class Player:
         return level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE]
 
     def place(self):  # works
-        if self.selected_tile == "Extractor":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Extractor([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
-        elif self.selected_tile == "Manufacturer":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Manufacturer([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], 0)
-        elif self.selected_tile == "Belt":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Belt([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle)
-        elif self.selected_tile == "Intersection":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Intersection([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle)
-        elif self.selected_tile == "Splitter":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Splitter([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle)
-        elif self.selected_tile == "Tile":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Tile([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle)
+        level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = sys.modules[__name__].__getattribute__(self.selected_tile)([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle, level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].resource)
 
     def click(self, pos):
         self.last_pos = pos
@@ -232,46 +225,73 @@ class Player:
         elif key == pg.K_r:
             self.tile_angle = (self.tile_angle - 90) % 360
 
+
 class Extractor(Tile):
-    def __init__(self, pos, angle, ghost=False):
-        super().__init__(pos, angle, ghost)
+    def __init__(self, pos, angle, resource, ghost=False):
+        super().__init__(pos, angle, resource, ghost)
         self.type = "Extractor"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
+        self.t = time.perf_counter()
+        self.dt = 0
 
     def tick(self):
         # adds an item based on resources
         super(Extractor, self).tick()
-        self.items.append(Item(self.resource))
+        self.dt += time.perf_counter() - self.t
+        self.t = time.perf_counter()
+        if self.dt > 1 / TICK_RATE:
+            self.items.append(Item(self.resource))
+            self.dt -= 1 / TICK_RATE
+
 
 class Manufacturer(Tile):
-    def __init__(self, pos, angle, ghost=False):
-        super().__init__(pos, angle, ghost)
+    def __init__(self, pos, angle, resource, ghost=False):
+        super().__init__(pos, angle, resource, ghost)
         self.type = "Manufacturer"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_factory.png"), (TILE_SIZE, TILE_SIZE))
+        self.t = time.perf_counter()
+        self.dt = 0
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
         # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
-        #super(Manufacturer, self).tick()
-        if rc.get_recipe(self.items):
-            recipe = rc.get_recipe(self.items)
-            for i in recipe.inputs:
-                for index in range(len(self.items)):
-                    if self.items[index].name == i:
-                        self.items.pop(index)
-                        break
-            self.items.extend(recipe.get_outputs())
-            print(self.items[-1].name)
-
-        # TODO implement this
+        self.dt += time.perf_counter() - self.t
+        self.t = time.perf_counter()
+        if self.dt > 1 / TICK_RATE:
+            if rc.get_recipe(self.items):
+                recipe = rc.get_recipe(self.items)
+                for i in recipe.inputs:
+                    for index in range(len(self.items)):
+                        if self.items[index].name == i and not self.items[index].manufactured:
+                            self.items.pop(index)
+                            break
+                outputs = recipe.get_outputs()
+                for item in outputs:
+                    item.manufactured = True
+                self.items.extend(outputs)
+                print(self.items[-1].name)
+        for i in self.items:
+            if i.manufactured:
+                i.offset += TICK_RATE / FPS
+        i = 0
+        while i < len(self.items):
+            if not self.items[i].moved and self.items[i].offset > 1 and \
+                   -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                temp = self.items.pop(i)
+                temp.moved = True
+                temp.manufactured = False
+                temp.offset -= 1
+                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
+            else:
+                i += 1
 
 
 class Belt(Tile):
-    def __init__(self, pos, angle, ghost=False):
-        super().__init__(pos, angle, ghost)
+    def __init__(self, pos, angle, resource, ghost=False):
+        super().__init__(pos, angle, resource, ghost)
         self.type = "Belt"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
@@ -279,8 +299,8 @@ class Belt(Tile):
 
 
 class Intersection(Belt):
-    def __init__(self, pos, angle, ghost=False):
-        super().__init__(pos, angle, ghost)
+    def __init__(self, pos, angle, resource, ghost=False):
+        super().__init__(pos, angle, resource, ghost)
         self.type = "Intersection"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
@@ -295,6 +315,7 @@ class Intersection(Belt):
                     -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                 temp = self.items.pop(i)
                 temp.moved = True
+                temp.manufactured = False
                 temp.offset -= 1
                 level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
             else:
@@ -302,10 +323,11 @@ class Intersection(Belt):
 
 
 class Splitter(Belt):
-    def __init__(self, pos, angle, ghost=False):
-        super().__init__(pos, angle, ghost)
+    def __init__(self, pos, angle, resource, ghost=False):
+        super().__init__(pos, angle, resource, ghost)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
+
     def tick(self):
         # Alternates between left and right
         # TODO doesn't work for some reason, don't use
@@ -316,12 +338,30 @@ class Splitter(Belt):
             if not self.items[i].moved and self.items[i].offset > 1:
                 self.split_bool = not self.split_bool
                 temp = self.items.pop(i)
-
+                temp.manufactured = False
                 temp.moved = True
                 temp.offset -= 1
                 level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
             else:
                 i += 1
+
+
+class Void(Tile):
+    def __init__(self, pos, angle, resource):
+        super().__init__(pos, angle, resource)
+        self.type = "Void"
+
+    def tick(self):
+        self.items = []
+
+
+class Exit(Tile):
+    def __init__(self, pos, angle, resource):
+        super().__init__(pos, angle, resource)
+        self.type = "Void"
+
+    def tick(self):
+        super(Exit, self).tick()
 
 
 rc = Recipe_Collection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
