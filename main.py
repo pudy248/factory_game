@@ -27,6 +27,7 @@ class Level:
                     i.moved = False
                     if self.tile_array[tiley][tilex].type == "Splitter":
                         i.direction = self.tile_array[tiley][tilex].direction.rotate(90 if self.tile_array[tiley][tilex].split_bool else 270)
+                        print(self.tile_array[tiley][tilex].split_bool)
                     else:
                         i.direction = self.tile_array[tiley][tilex].direction
         for tiley in range(self.side):
@@ -39,7 +40,7 @@ class Level:
                 self.tile_array[tiley][tilex].draw()
         for tiley in range(self.side):
             for tilex in range(self.side):
-                if self.tile_array[tiley][tilex].type == "Belt" and len(self.tile_array[tiley][tilex].items) > 0:
+                if self.tile_array[tiley][tilex].type == "Belt" or len(self.tile_array[tiley][tilex].items) > 0:  # change back to and
                     for i in self.tile_array[tiley][tilex].items:
                         img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
                         SURF.blit(img, (self.tile_array[tiley][tilex].pos[0] * TILE_SIZE + TILE_SIZE / 4 +
@@ -87,7 +88,10 @@ class Loader:
 class Item:
     def __init__(self, name):
         self.name = name
-        self.image = pg.image.load("sprites\\tile_grass.png")
+        if os.path.exists("sprites\\" + name + ".png"):
+            self.image = pg.image.load("sprites\\" + name + ".png")
+        else:
+            self.image = pg.image.load("sprites\\tile_grass.png")
         self.direction = pg.Vector2([0, 1])
         self.moved = True
         self.offset = 0
@@ -98,6 +102,12 @@ class Recipe:
         self.inputs = inputs
         self.outputs = outputs
 
+    def get_outputs(self):
+        temp = []
+        for i in self.outputs:
+            temp.append(Item(i))
+        return temp
+
     def check_inputs(self, inputs):
         if len(inputs) != len(self.inputs):
             return False
@@ -105,7 +115,7 @@ class Recipe:
             for i in inputs:
                 contained = False
                 for j in self.inputs:
-                    if i == j:
+                    if i.name == j:
                         contained = True
                 if not contained:
                     return False
@@ -254,18 +264,17 @@ class Manufacturer(Tile):
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
-        # adds an item based on resources
-        inputs = []
-        for i in self.items:
-            if i.name not in inputs:
-                inputs.append(i.name)
-        recipie = None  # Recipie collection on inputs
-        self.dt += time.perf_counter() - self.t
-        self.t = time.perf_counter()
-        if self.dt > 1 / TICK_RATE:
-            # add outputs from recipie
-            self.dt -= 1 / TICK_RATE
-        super(Manufacturer, self).tick()
+        # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
+        #super(Manufacturer, self).tick()
+        if rc.get_recipe(self.items):
+            recipe = rc.get_recipe(self.items)
+            for i in recipe.inputs:
+                for index in range(len(self.items)):
+                    if self.items[index].name == i:
+                        self.items.pop(index)
+                        break
+            self.items.extend(recipe.get_outputs())
+            print(self.items[-1].name)
 
 
 class Belt(Tile):
@@ -342,16 +351,17 @@ class Exit(Tile):
         #TODO implement this
 
 
-rc = Recipe_Collection((Recipe(("Wood", "Iron Ore"), ("Iron Bar")), Recipe(("Natural Gas", "Iron Ore"), ("Iron Bar")),
-                        Recipe(("Coal", "Iron Bar"), ("Steel Bar")), Recipe(("Iron Bar"), ("Iron Tubes")), Recipe(("Iron Tubes"), ("Screws")),
-                        Recipe(("Steel Bar"), ("Steel Tubes")), Recipe(("Steel Bar", "Iron Bar"), ("Alloy Plate")),
-                        Recipe(("Steel Tubes"), ("Springs")), Recipe(("Screws", "Springs"), ("Machine Parts")),
-                        Recipe(("Alloy Plate", "Machine Parts", "Steel Tubes"), ("Engines")), Recipe(("Engines", "Springs", "Coal"), ("Locomotives")),
-                        Recipe(("Engines", "Alloy Plate", "Gasoline"), ("Automobiles")), Recipe(("Steel Tubes", "Plastic"), ("Consumer Goods")),
-                        Recipe(("Oil"), ("Natural Gas", "Petroleum")), Recipe(("Petroleum"), ("Plastic", "Gasoline"))))
+rc = Recipe_Collection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
+                        Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Iron Bar"], ["Iron Tubes"]), Recipe(["Iron Tubes"], ["Screws"]),
+                        Recipe(["Steel Bar"], ["Steel Tubes"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
+                        Recipe(["Steel Tubes"], ["Springs"]), Recipe(["Screws", "Springs"], ["Machine Parts"]),
+                        Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]), Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
+                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]), Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
+                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
 level = load.load_level(0) # 0.txt is just a dummy for testing
-level.tile_array[0][0].items.append(Item(""))
+level.tile_array[0][0].items.append(Item("Iron Ore"))
+level.tile_array[1][0].items.append(Item("Wood"))
 player = Player()
 while True:
     level.world_tick()
