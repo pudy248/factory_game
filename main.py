@@ -1,5 +1,8 @@
+import os
+import sys
+import time
+
 import pygame as pg
-import sys, os, time
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pg.init()
@@ -76,12 +79,21 @@ class Loader:
                 pos = [x, y]
                 str = tMap[y][x]
                 if str == '+':
-                    newMap[y][x] = Intersection(pos, 0, "Oil")
-                    newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE))
+                    newMap[y][x] = Intersection(pos, 0)
+                    newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"),
+                                                            (TILE_SIZE, TILE_SIZE))
                 elif str in ["<", ">", "^", "v"]:
                     angle = 0 if str == '>' else (90 if str == '^' else (180 if str == '<' else 270))
-                    newMap[y][x] = Belt(pos, angle, "Oil")
-                else:
+                    newMap[y][x] = Belt(pos, angle)
+                elif str == 'X':
+                    newMap[y][x] = Tile(pos, 0, "Out of Bounds")
+                elif str == 'I':
+                    newMap[y][x] = Tile(pos, 0, "Iron")
+                elif str == 'W':
+                    newMap[y][x] = Tile(pos, 0, "Wood")
+                elif str == 'C':
+                    newMap[y][x] = Tile(pos, 0, "Coal")
+                elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
         return Level(newMap)
 
@@ -89,6 +101,9 @@ class Loader:
 class Item:
     def __init__(self, name):
         self.name = name
+        self.image = pg.image.load("sprites\\tile_grass.png")
+        self.direction = pg.Vector2([0, 1])
+        self.moved = True
         if os.path.exists("sprites\\" + name + ".png"):
             self.image = pg.image.load("sprites\\" + name + ".png")
         else:
@@ -169,8 +184,6 @@ class Tile:
                 else:
                     i += 1
 
-
-
     def is_open(self, type):
         return True
         if self.resource == "Out of Bounds":
@@ -197,7 +210,10 @@ class Player:
         return level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE]
 
     def place(self):  # works
-        level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = sys.modules[__name__].__getattribute__(self.selected_tile)([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle, level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].resource)
+        level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = sys.modules[
+            __name__].__getattribute__(self.selected_tile)(
+            [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle,
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].resource)
 
     def click(self, pos):
         self.last_pos = pos
@@ -207,7 +223,8 @@ class Player:
 
     def move(self, pos):
         self.last_pos = pos
-        self.ghost_tile = sys.modules[__name__].__getattribute__(self.selected_tile)([(self.last_pos[0]//TILE_SIZE), (self.last_pos[1]//TILE_SIZE)], self.tile_angle, False, True)
+        self.ghost_tile = sys.modules[__name__].__getattribute__(self.selected_tile)(
+            [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle, True)
 
     def select(self, key):
         if key == pg.K_1:
@@ -225,7 +242,7 @@ class Player:
         elif key == pg.K_r:
             self.tile_angle = (self.tile_angle - 90) % 360
 
-
+            
 class Extractor(Tile):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
