@@ -84,7 +84,7 @@ class Loader:
                     newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"),
                                                             (TILE_SIZE, TILE_SIZE))
                 elif str in ["<", ">", "^", "v"]:
-                    angle = 0 if str == 'v' else (90 if str == '>' else (180 if str == '^' else 270))
+                    angle = 0 if str == '>' else (90 if str == '^' else (180 if str == '<' else 270))
                     newMap[y][x] = Belt(pos, angle)
                 else:
                     newMap[y][x] = Tile(pos, 0)
