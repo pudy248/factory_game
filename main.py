@@ -74,7 +74,7 @@ class Loader:
         side = len(tMap)
         newMap = []
         for i in range(side):
-            newMap.append([Tile([0, 0], 0)] * side)
+            newMap.append([Tile([0, 0], 0, "None")] * side)
         for y in range(side):
             for x in range(side):
                 pos = [x, y]
@@ -86,26 +86,16 @@ class Loader:
                 elif str in ["<", ">", "^", "v"]:
                     angle = 0 if str == '>' else (90 if str == '^' else (180 if str == '<' else 270))
                     newMap[y][x] = Belt(pos, angle)
-                else:
-                    newMap[y][x] = Tile(pos, 0)
-                    if str == 'X':
-                        newMap[y][x].resource = "Out of Bounds"
-                    elif str == 'I':
-                        newMap[y][x].resource = "Iron"
-                        newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\Iron Ore.png"),
-                                                                (TILE_SIZE, TILE_SIZE))
-                    elif str == 'W':
-                        newMap[y][x].resource = "Wood"
-                        newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\Wood.png"),
-                                                                (TILE_SIZE, TILE_SIZE))
-                    elif str == 'C':
-                        newMap[y][x].resource = "Coal"
-                        newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\Coal Ore.png"),
-                                                                (TILE_SIZE, TILE_SIZE))
-                    elif str == 'O':
-                        newMap[y][x].resource = "Oil"
-                        newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\Oil.png"),
-                                                                (TILE_SIZE, TILE_SIZE))
+                elif str == 'X':
+                    newMap[y][x] = Tile(pos, 0, "Out of Bounds")
+                elif str == 'I':
+                    newMap[y][x] = Tile(pos, 0, "Iron")
+                elif str == 'W':
+                    newMap[y][x] = Tile(pos, 0, "Wood")
+                elif str == 'C':
+                    newMap[y][x] = Tile(pos, 0, "Coal")
+                elif str == 'O':
+                    newMap[y][x] = Tile(pos, 0, "Oil")
         return Level(newMap)
 
 
@@ -150,13 +140,13 @@ class Recipe_Collection:
 
 
 class Tile:
-    def __init__(self, pos, angle, ghost=False):
+    def __init__(self, pos, angle, resource, ghost=False):
         self.pos = pos
         self.direction = pg.Vector2([1, 0]).rotate(angle)
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
-        self.resource = "None"  # None, Iron, Wood, Coal, Oil, Out of Bounds
+        self.resource = resource  # None, Iron, Wood, Coal, Oil, Out of Bounds
         self.type = "Tile"
         self.items = []
 
@@ -164,8 +154,7 @@ class Tile:
         return str(self.type) + ": " + str(self.pos)
 
     def draw(self):
-        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))),
-                  (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
+        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))), (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
 
     def tick(self):
         if self.type != "Tile":
@@ -174,17 +163,14 @@ class Tile:
             i = 0
             while i < len(self.items):
                 if not self.items[i].moved and self.items[i].offset > 1 and \
-                        -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(
-                    self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                       -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                     temp = self.items.pop(i)
                     temp.moved = True
+                    temp.manufactured = False
                     temp.offset -= 1
-                    level.tile_array[int(self.pos[1] - temp.direction.y)][
-                        int(self.pos[0] + temp.direction.x)].items.append(temp)
+                    level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
                 else:
                     i += 1
-
-
 
     def is_open(self, type):
         if self.resource == "Out of Bounds":
@@ -199,7 +185,7 @@ class Player:
         self.selected_tile = "Tile"
         self.tile_angle = 0
         self.last_pos = [0, 0]
-        self.ghost_tile = Tile(self.last_pos, 0)
+        self.ghost_tile = Tile(self.last_pos, 0, "None")
 
     def is_in_level(self):  # Detects if pos is within the level
         return self.last_pos[0] < TILE_SIZE * len(level.tile_array[0]) and self.last_pos[1] < TILE_SIZE * len(
@@ -212,24 +198,10 @@ class Player:
         return level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE]
 
     def place(self):  # works
-        if self.selected_tile == "Extractor":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Extractor(
-                [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], 0)
-        elif self.selected_tile == "Manufacturer":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Manufacturer(
-                [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], 0)
-        elif self.selected_tile == "Belt":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Belt(
-                [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle)
-        elif self.selected_tile == "Intersection":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Intersection(
-                [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle)
-        elif self.selected_tile == "Splitter":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Splitter(
-                [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle)
-        elif self.selected_tile == "Tile":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Tile(
-                [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle)
+        level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = sys.modules[
+            __name__].__getattribute__(self.selected_tile)(
+            [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle,
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].resource)
 
     def click(self, pos):
         self.last_pos = pos
