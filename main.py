@@ -79,12 +79,12 @@ class Loader:
                 pos = [x, y]
                 str = tMap[y][x]
                 if str == '+':
-                    newMap[y][x] = Intersection(pos, 0)
+                    newMap[y][x] = Intersection(pos, 0, "None")
                     newMap[y][x].image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"),
                                                             (TILE_SIZE, TILE_SIZE))
                 elif str in ["<", ">", "^", "v"]:
                     angle = 0 if str == '>' else (90 if str == '^' else (180 if str == '<' else 270))
-                    newMap[y][x] = Belt(pos, angle)
+                    newMap[y][x] = Belt(pos, angle, "None")
                 elif str == 'X':
                     newMap[y][x] = Tile(pos, 0, "Out of Bounds")
                 elif str == 'I':
@@ -95,6 +95,8 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Coal")
                 elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
+                else:
+                    newMap[y][x] = Tile(pos, 0, "None")
         return Level(newMap)
 
 
