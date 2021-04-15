@@ -90,6 +90,8 @@ class Loader:
                     newMap[y][x] = Belt(pos, angle, "None")
                 elif str == 'X':
                     newMap[y][x] = Tile(pos, 0, "Out of Bounds")
+                elif str == 'E':
+                    newMap[y][x] = Exit(pos, 0, "None")
                 elif str == 'I':
                     newMap[y][x] = Tile(pos, 0, "Iron")
                 elif str == 'W':
