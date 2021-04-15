@@ -22,12 +22,13 @@ TICK_RATE = 2  # ticks per second
 class Level:
     def __init__(self, tMap, g):
         self.tile_array = tMap
-        self.side = len(self.tile_array)
+        self.length = len(self.tile_array)
         self.goal = g
 
     def world_tick(self):
-        for tiley in range(self.side):
-            for tilex in range(self.side):
+        for tiley in range(self.length):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 for i in self.tile_array[tiley][tilex].items:
                     i.moved = False
                     if self.tile_array[tiley][tilex].type == "Splitter":
@@ -35,16 +36,19 @@ class Level:
                         print(self.tile_array[tiley][tilex].split_bool)
                     else:
                         i.direction = self.tile_array[tiley][tilex].direction
-        for tiley in range(self.side):
-            for tilex in range(self.side):
+        for tiley in range(self.length):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 self.tile_array[tiley][tilex].tick()
 
     def draw_level(self):
-        for tiley in range(self.side):
-            for tilex in range(self.side):
+        for tiley in range(self.length):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 self.tile_array[tiley][tilex].draw()
-        for tiley in range(self.side):
-            for tilex in range(self.side):
+        for tiley in range(self.length):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 if self.tile_array[tiley][tilex].type == "Belt" or len(self.tile_array[tiley][tilex].items) > 0:  # change back to and
                     for i in self.tile_array[tiley][tilex].items:
                         img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
@@ -78,12 +82,14 @@ class Loader:
         return lvl
 
     def convert(self, tMap, g):
-        side = len(tMap)
+        length = len(tMap)
         newMap = []
-        for i in range(side):
-            newMap.append([Tile([0, 0], 0, "None")] * side)
-        for y in range(side):
-            for x in range(side):
+        for i in range(length):
+            width = len(tMap[i])
+            newMap.append([Tile([0, 0], 0, "None")] * width)
+        for y in range(length):
+            width = len(tMap[y])
+            for x in range(width):
                 pos = [x, y]
                 str = tMap[y][x]
                 if str == '+':
@@ -399,7 +405,7 @@ rc = Recipe_Collection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Nat
                         Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]), Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                         Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(0)  # 0.txt is just a dummy for testing
+level = load.load_level(8)  # 0.txt is just a dummy for testing
 level.tile_array[0][0].items.append(Item("Iron Ore"))
 level.tile_array[1][0].items.append(Item("Wood"))
 player = Player()
