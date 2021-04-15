@@ -1,6 +1,6 @@
 > v 0 0 I
 < v W 0 0
-0 v 0 C 0
+O v 0 C 0
 O v 0 0 0
 0 v 0 0 0
 Test

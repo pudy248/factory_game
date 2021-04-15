@@ -98,6 +98,8 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Coal")
                 elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
+                else:
+                    newMap[y][x] = Tile(pos, 0, "None")
         return Level(newMap, g)
 
 
