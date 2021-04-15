@@ -405,7 +405,7 @@ rc = Recipe_Collection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Nat
                         Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]), Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                         Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(8)  # 0.txt is just a dummy for testing
+level = load.load_level(0)  # 0.txt is just a dummy for testing
 level.tile_array[0][0].items.append(Item("Iron Ore"))
 level.tile_array[1][0].items.append(Item("Wood"))
 player = Player()
