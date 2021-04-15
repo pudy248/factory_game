@@ -18,9 +18,10 @@ TICK_RATE = 2  # ticks per second
 
 
 class Level:
-    def __init__(self, tMap):
+    def __init__(self, tMap, g):
         self.tile_array = tMap
         self.side = len(self.tile_array)
+        self.goal = g
 
     def world_tick(self):
         for tiley in range(self.side):
@@ -67,10 +68,12 @@ class Loader:
             tMap.append([])
         for i in range(len(tMap)):
             tMap[i] = lines[i].split(" ")
-        lvl = self.convert(tMap)
+        g = tMap[len(tMap) - 1]
+        tMap.remove(g)
+        lvl = self.convert(tMap, g)
         return lvl
 
-    def convert(self, tMap):
+    def convert(self, tMap, g):
         side = len(tMap)
         newMap = []
         for i in range(side):
@@ -96,7 +99,7 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Coal")
                 elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
-        return Level(newMap)
+        return Level(newMap, g)
 
 
 class Item:
