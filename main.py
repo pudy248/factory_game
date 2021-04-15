@@ -67,8 +67,13 @@ class Loader:
             tMap.append([])
         for i in range(len(tMap)):
             tMap[i] = lines[i].split(" ")
-        g = tMap[len(tMap) - 1]
-        tMap.remove(g)
+        g = ""
+        gArr = tMap[len(tMap) - 1]
+        for i in range(len(gArr)):
+            if not i == 0:
+                g += " "
+            g += gArr[i]
+        tMap.remove(gArr)
         lvl = self.convert(tMap, g)
         return lvl
 
@@ -394,7 +399,7 @@ rc = Recipe_Collection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Nat
                         Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]), Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                         Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(7)  # 0.txt is just a dummy for testing
+level = load.load_level(0)  # 0.txt is just a dummy for testing
 level.tile_array[0][0].items.append(Item("Iron Ore"))
 level.tile_array[1][0].items.append(Item("Wood"))
 player = Player()
