@@ -69,6 +69,7 @@ class Loader:
             tMap[i] = lines[i].split(" ")
         g = tMap[len(tMap) - 1]
         tMap.remove(g)
+        g = g[0]
         lvl = self.convert(tMap, g)
         return lvl
 
@@ -98,6 +99,8 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Coal")
                 elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
+                elif str == 'E':
+                    newMap[y][x] = Exit(pos, 0, "None")
                 else:
                     newMap[y][x] = Tile(pos, 0, "None")
         return Level(newMap, g)
@@ -380,10 +383,24 @@ class Void(Tile):
 class Exit(Tile):
     def __init__(self, pos, angle, resource):
         super().__init__(pos, angle, resource)
+        self.image = pg.transform.scale(pg.image.load("sprites\\Alloy Plate.png"), (TILE_SIZE, TILE_SIZE))
         self.type = "Void"
+        self.t = 0
+        self.dt = 0
 
     def tick(self):
-        super(Exit, self).tick()
+        self.dt += time.perf_counter() - self.t
+        self.t = time.perf_counter()
+        if self.dt > 10 / TICK_RATE:
+            self.items.append(Item(self.resource))
+            self.dt -= 10 / TICK_RATE
+            temp_item_num = 0
+            for i in self.items:
+                if i.name == level.goal:
+                    temp_item_num += 1
+            if temp_item_num >= 10:
+                print("done")
+            self.items = []
 
 
 rc = Recipe_Collection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
