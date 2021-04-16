@@ -243,7 +243,7 @@ class Player:
     def move(self, pos):
         self.last_pos = pos
         self.ghost_tile = sys.modules[__name__].__getattribute__(self.selected_tile)(
-            [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle, True)
+            [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle, "None", True)
 
     def select(self, key):
         if key == pg.K_1:
@@ -409,10 +409,24 @@ class Void(Tile):
 class Exit(Tile):
     def __init__(self, pos, angle, resource):
         super().__init__(pos, angle, resource)
+        self.image = pg.transform.scale(pg.image.load("sprites\\Alloy Plate.png"), (TILE_SIZE, TILE_SIZE))
         self.type = "Void"
+        self.t = 0
+        self.dt = 0
 
     def tick(self):
-        super(Exit, self).tick()
+        self.dt += time.perf_counter() - self.t
+        self.t = time.perf_counter()
+        if self.dt > 10 / TICK_RATE:
+            self.items.append(Item(self.resource))
+            self.dt -= 10 / TICK_RATE
+            temp_item_num = 0
+            for i in self.items:
+                if i.name == level.goal:
+                    temp_item_num += 1
+            if temp_item_num >= 10:
+                print("done")
+            self.items = []
 
 
 rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
