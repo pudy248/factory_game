@@ -384,6 +384,9 @@ class Splitter(Belt):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
+        self.image = pg.transform.scale(pg.image.load("sprites\\Splitter.png"), (TILE_SIZE, TILE_SIZE))
+        if ghost:
+            self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
         # Alternates between left and right
