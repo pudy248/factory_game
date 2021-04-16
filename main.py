@@ -22,20 +22,23 @@ TICK_RATE = 2  # ticks per second
 class Level:
     def __init__(self, tMap, g):
         self.tile_array = tMap
-        self.side = len(self.tile_array)
+        self.length = len(self.tile_array)
         self.goal = g
 
     def world_tick(self):
-        for tiley in range(self.side):
-            for tilex in range(self.side):
+        for tiley in range(self.length):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 self.tile_array[tiley][tilex].tick()
 
     def draw_level(self):
-        for tiley in range(self.side):
-            for tilex in range(self.side):
+        for tiley in range(self.length):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 self.tile_array[tiley][tilex].draw()
-        for tiley in range(self.side):
-            for tilex in range(self.side):
+        for tiley in range(self.length):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 if self.tile_array[tiley][tilex].type == "Belt" or len(self.tile_array[tiley][tilex].items) > 0:  # change back to and
                     for i in self.tile_array[tiley][tilex].items:
                         img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
@@ -59,19 +62,25 @@ class Loader:
             tMap.append([])
         for i in range(len(tMap)):
             tMap[i] = lines[i].split(" ")
-        g = tMap[len(tMap) - 1]
-        tMap.remove(g)
-        g = g[0]
+        g = ""
+        gArr = tMap[len(tMap) - 1]
+        for i in range(len(gArr)):
+            if not i == 0:
+                g += " "
+            g += gArr[i]
+        tMap.remove(gArr)
         lvl = self.convert(tMap, g)
         return lvl
 
     def convert(self, tMap, g):
-        side = len(tMap)
+        length = len(tMap)
         newMap = []
-        for i in range(side):
-            newMap.append([Tile([0, 0], 0, "None")] * side)
-        for y in range(side):
-            for x in range(side):
+        for i in range(length):
+            width = len(tMap[i])
+            newMap.append([Tile([0, 0], 0, "None")] * width)
+        for y in range(length):
+            width = len(tMap[y])
+            for x in range(width):
                 pos = [x, y]
                 str = tMap[y][x]
                 if str == '+':
@@ -83,6 +92,8 @@ class Loader:
                     newMap[y][x] = Belt(pos, angle, "None")
                 elif str == 'X':
                     newMap[y][x] = Tile(pos, 0, "Out of Bounds")
+                elif str == 'E':
+                    newMap[y][x] = Exit(pos, 0, "None")
                 elif str == 'I':
                     newMap[y][x] = Tile(pos, 0, "Iron")
                 elif str == 'W':
@@ -91,11 +102,10 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Coal")
                 elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
-                elif str == 'E':
-                    newMap[y][x] = Exit(pos, 0, "None")
                 else:
                     newMap[y][x] = Tile(pos, 0, "None")
         return Level(newMap, g)
+
 
 
 class Item:
