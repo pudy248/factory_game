@@ -20,9 +20,10 @@ TICK_RATE = 2  # ticks per second
 
 
 class Level:
-    def __init__(self, tMap):
+    def __init__(self, tMap, g):
         self.tile_array = tMap
         self.side = len(self.tile_array)
+        self.goal = g
 
     def world_tick(self):
         for tiley in range(self.side):
@@ -58,10 +59,13 @@ class Loader:
             tMap.append([])
         for i in range(len(tMap)):
             tMap[i] = lines[i].split(" ")
-        lvl = self.convert(tMap)
+        g = tMap[len(tMap) - 1]
+        tMap.remove(g)
+        g = g[0]
+        lvl = self.convert(tMap, g)
         return lvl
 
-    def convert(self, tMap):
+    def convert(self, tMap, g):
         side = len(tMap)
         newMap = []
         for i in range(side):
@@ -87,9 +91,11 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Coal")
                 elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
+                elif str == 'E':
+                    newMap[y][x] = Exit(pos, 0, "None")
                 else:
                     newMap[y][x] = Tile(pos, 0, "None")
-        return Level(newMap)
+        return Level(newMap, g)
 
 
 class Item:
@@ -220,7 +226,7 @@ class Player:
     def move(self, pos):
         self.last_pos = pos
         self.ghost_tile = sys.modules[__name__].__getattribute__(self.selected_tile)(
-            [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle, True)
+            [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle, "None", True)
 
     def select(self, key):
         if key == pg.K_1:
@@ -380,10 +386,24 @@ class Void(Tile):
 class Exit(Tile):
     def __init__(self, pos, angle, resource):
         super().__init__(pos, angle, resource)
+        self.image = pg.transform.scale(pg.image.load("sprites\\Alloy Plate.png"), (TILE_SIZE, TILE_SIZE))
         self.type = "Void"
+        self.t = 0
+        self.dt = 0
 
     def tick(self):
-        super(Exit, self).tick()
+        self.dt += time.perf_counter() - self.t
+        self.t = time.perf_counter()
+        if self.dt > 10 / TICK_RATE:
+            self.items.append(Item(self.resource))
+            self.dt -= 10 / TICK_RATE
+            temp_item_num = 0
+            for i in self.items:
+                if i.name == level.goal:
+                    temp_item_num += 1
+            if temp_item_num >= 10:
+                print("done")
+            self.items = []
 
 
 rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
