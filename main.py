@@ -104,7 +104,7 @@ class Loader:
                 elif str == 'E':
                     newMap[y][x] = Exit(pos, 0, "None")
                 elif str == 'I':
-                    newMap[y][x] = Tile(pos, 0, "Iron")
+                    newMap[y][x] = Tile(pos, 0, "Iron Ore")
                 elif str == 'W':
                     newMap[y][x] = Tile(pos, 0, "Wood")
                 elif str == 'C':
@@ -213,6 +213,10 @@ class Tile:
             return False
         elif self.resource != "None" and type != "Extractor":
             return False
+        elif self.type == "Exit":
+            return False
+        elif self.resource == "None" and type == "Extractor":
+            return False
         return True
 
 
@@ -238,6 +242,13 @@ class Player:
             __name__].__getattribute__(self.selected_tile)(
             [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle,
             level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].resource)
+
+    def remove(self, pos):
+        self.last_pos = pos
+        if level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].type != "Exit":
+            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Tile(
+                [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle,
+                level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].resource)
 
     def click(self, pos):
         self.last_pos = pos
@@ -377,6 +388,9 @@ class Splitter(Belt):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
+        self.image = pg.transform.scale(pg.image.load("sprites\\Splitter.png"), (TILE_SIZE, TILE_SIZE))
+        if ghost:
+            self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
         # Alternates between left and right
@@ -415,7 +429,7 @@ class Exit(Tile):
     def __init__(self, pos, angle, resource):
         super().__init__(pos, angle, resource)
         self.image = pg.transform.scale(pg.image.load("sprites\\Alloy Plate.png"), (TILE_SIZE, TILE_SIZE))
-        self.type = "Void"
+        self.type = "Exit"
         self.t = 0
         self.dt = 0
 
@@ -447,9 +461,9 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(0)  # 0.txt is just a dummy for testing
-level.tile_array[0][0].items.append(Item("Iron Ore"))
-level.tile_array[1][0].items.append(Item("Wood"))
+level = load.load_level(6)  # 0.txt is just a dummy for testing
+# level.tile_array[0][0].items.append(Item("Iron Ore"))
+# level.tile_array[1][0].items.append(Item("Wood"))
 player = Player()
 while True:
     level.world_tick()
@@ -463,7 +477,10 @@ while True:
         elif event.type == pg.KEYDOWN:
             player.select(event.key)
         elif event.type == pg.MOUSEBUTTONUP:
-            player.click(event.pos)
+            if event.button == pg.BUTTON_LEFT:
+                player.click(event.pos)
+            elif event.button == pg.BUTTON_RIGHT:
+                player.remove(event.pos)
     player.move(pg.mouse.get_pos())
     pg.display.update()
     clock.tick(FPS)
