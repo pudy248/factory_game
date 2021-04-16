@@ -26,8 +26,9 @@ class Level:
         self.goal = g
 
     def world_tick(self):
-        for tiley in range(self.side):
-            for tilex in range(self.side):
+        for tiley in range(self.length):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 self.tile_array[tiley][tilex].tick()
 
     def draw_level(self):
@@ -103,7 +104,7 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Oil")
                 else:
                     newMap[y][x] = Tile(pos, 0, "None")
-        return Level(newMap)
+        return Level(newMap, g)
 
 
 class Item:
