@@ -11,11 +11,12 @@ W = pg.display.Info().current_w
 H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
-
 #####CONSTANTS#####
 FPS = 60
 TILE_SIZE = 100  # dimensions of each tile in pixels
 TICK_RATE = 2  # ticks per second
+
+
 #####################
 
 
@@ -29,16 +30,6 @@ class Level:
         for tiley in range(self.length):
             width = len(self.tile_array[tiley])
             for tilex in range(width):
-                for i in self.tile_array[tiley][tilex].items:
-                    i.moved = False
-                    if self.tile_array[tiley][tilex].type == "Splitter":
-                        i.direction = self.tile_array[tiley][tilex].direction.rotate(90 if self.tile_array[tiley][tilex].split_bool else 270)
-                        print(self.tile_array[tiley][tilex].split_bool)
-                    else:
-                        i.direction = self.tile_array[tiley][tilex].direction
-        for tiley in range(self.length):
-            width = len(self.tile_array[tiley])
-            for tilex in range(width):
                 self.tile_array[tiley][tilex].tick()
 
     def draw_level(self):
@@ -49,11 +40,15 @@ class Level:
         for tiley in range(self.length):
             width = len(self.tile_array[tiley])
             for tilex in range(width):
-                if self.tile_array[tiley][tilex].type == "Belt" or len(self.tile_array[tiley][tilex].items) > 0:  # change back to and
+                if self.tile_array[tiley][tilex].type == "Belt" or len(
+                        self.tile_array[tiley][tilex].items) > 0:  # change back to and
                     for i in self.tile_array[tiley][tilex].items:
                         img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
                         SURF.blit(img, (self.tile_array[tiley][tilex].pos[0] * TILE_SIZE + TILE_SIZE / 4 +
-                            (i.offset * i.direction[0] * TILE_SIZE), self.tile_array[tiley][tilex].pos[1] * TILE_SIZE + TILE_SIZE / 4 - (i.offset * i.direction[1] * TILE_SIZE)))
+                                        (i.offset * i.direction[0] * TILE_SIZE),
+                                        self.tile_array[tiley][tilex].pos[1] * TILE_SIZE + TILE_SIZE / 4 - (
+                                                i.offset * i.direction[1] * TILE_SIZE)))
+
 
 class Loader:
     def __init__(self):
@@ -111,6 +106,8 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Coal")
                 elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
+                else:
+                    newMap[y][x] = Tile(pos, 0, "None")
         return Level(newMap, g)
 
 
@@ -155,7 +152,7 @@ class Recipe:
         return True
 
 
-class Recipe_Collection:
+class RecipeCollection:
     def __init__(self, recipes):
         self.recipes = []
         self.recipes.extend(recipes)
@@ -182,26 +179,31 @@ class Tile:
         return str(self.type) + ": " + str(self.pos)
 
     def draw(self):
-        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))), (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
+        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))),
+                  (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
 
     def tick(self):
         if self.type != "Tile":
             for i in self.items:
                 i.offset += TICK_RATE / FPS
+                if i.moved:
+                    i.direction = self.direction
+                    i.moved = False
             i = 0
             while i < len(self.items):
                 if not self.items[i].moved and self.items[i].offset > 1 and \
-                       -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                        -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(
+                    self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                     temp = self.items.pop(i)
                     temp.moved = True
                     temp.manufactured = False
                     temp.offset -= 1
-                    level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
+                    level.tile_array[int(self.pos[1] - temp.direction.y)][
+                        int(self.pos[0] + temp.direction.x)].items.append(temp)
                 else:
                     i += 1
 
     def is_open(self, type):
-        return True
         if self.resource == "Out of Bounds":
             return False
         elif self.resource != "None" and type != "Extractor":
@@ -217,7 +219,8 @@ class Player:
         self.ghost_tile = Tile(self.last_pos, 0, "None")
 
     def is_in_level(self):  # Detects if pos is within the level
-        return self.last_pos[0] < TILE_SIZE * len(level.tile_array[0]) and self.last_pos[1] < TILE_SIZE * len(level.tile_array)
+        return self.last_pos[0] < TILE_SIZE * len(level.tile_array[0]) and self.last_pos[1] < TILE_SIZE * len(
+            level.tile_array)
 
     def can_place(self):  # should work
         return self.selected_tile and self.get_tile().is_open(self.selected_tile)
@@ -258,7 +261,7 @@ class Player:
         elif key == pg.K_r:
             self.tile_angle = (self.tile_angle - 90) % 360
 
-            
+
 class Extractor(Tile):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
@@ -309,15 +312,20 @@ class Manufacturer(Tile):
         for i in self.items:
             if i.manufactured:
                 i.offset += TICK_RATE / FPS
+            if i.moved:
+                i.direction = self.direction
+                i.moved = False
         i = 0
         while i < len(self.items):
             if not self.items[i].moved and self.items[i].offset > 1 and \
-                   -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                    -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(
+                self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                 temp = self.items.pop(i)
                 temp.moved = True
                 temp.manufactured = False
                 temp.offset -= 1
-                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
+                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(
+                    temp)
             else:
                 i += 1
 
@@ -342,15 +350,19 @@ class Intersection(Belt):
     def tick(self):
         for i in self.items:
             i.offset += TICK_RATE / FPS
+            if i.moved:
+                i.moved = False
         i = 0
         while i < len(self.items):
             if not self.items[i].moved and self.items[i].offset > 1 and \
-                    -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                    -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(
+                self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                 temp = self.items.pop(i)
                 temp.moved = True
                 temp.manufactured = False
                 temp.offset -= 1
-                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
+                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(
+                    temp)
             else:
                 i += 1
 
@@ -363,18 +375,24 @@ class Splitter(Belt):
 
     def tick(self):
         # Alternates between left and right
-        # TODO doesn't work for some reason, don't use
         for i in self.items:
             i.offset += TICK_RATE / FPS
-        i = 0
-        while i > len(self.items):
-            if not self.items[i].moved and self.items[i].offset > 1:
+            if i.moved:
+                i.direction = self.direction.rotate(90 if self.split_bool else 270)
                 self.split_bool = not self.split_bool
+                i.moved = False
+        i = 0
+        while i < len(self.items):
+            if not self.items[i].moved and self.items[i].offset > 1 and -1 < int(
+                    self.pos[1] - self.items[i].direction.y) \
+                    < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(
+                level.tile_array[0]):
                 temp = self.items.pop(i)
-                temp.manufactured = False
                 temp.moved = True
+                temp.manufactured = False
                 temp.offset -= 1
-                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(temp)
+                level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(
+                    temp)
             else:
                 i += 1
 
@@ -397,15 +415,18 @@ class Exit(Tile):
         super(Exit, self).tick()
 
 
-rc = Recipe_Collection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
-                        Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Iron Bar"], ["Iron Tubes"]), Recipe(["Iron Tubes"], ["Screws"]),
-                        Recipe(["Steel Bar"], ["Steel Tubes"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
-                        Recipe(["Steel Tubes"], ["Springs"]), Recipe(["Screws", "Springs"], ["Machine Parts"]),
-                        Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]), Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
-                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]), Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
-                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
+rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
+                       Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Iron Bar"], ["Iron Tubes"]),
+                       Recipe(["Iron Tubes"], ["Screws"]),
+                       Recipe(["Steel Bar"], ["Steel Tubes"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
+                       Recipe(["Steel Tubes"], ["Springs"]), Recipe(["Screws", "Springs"], ["Machine Parts"]),
+                       Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
+                       Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
+                       Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
+                       Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
+                       Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(8)  # 0.txt is just a dummy for testing
+level = load.load_level(0)  # 0.txt is just a dummy for testing
 level.tile_array[0][0].items.append(Item("Iron Ore"))
 level.tile_array[1][0].items.append(Item("Wood"))
 player = Player()
