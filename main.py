@@ -104,7 +104,7 @@ class Loader:
                 elif str == 'E':
                     newMap[y][x] = Exit(pos, 0, "None")
                 elif str == 'I':
-                    newMap[y][x] = Tile(pos, 0, "Iron")
+                    newMap[y][x] = Tile(pos, 0, "Iron Ore")
                 elif str == 'W':
                     newMap[y][x] = Tile(pos, 0, "Wood")
                 elif str == 'C':
@@ -212,6 +212,10 @@ class Tile:
         if self.resource == "Out of Bounds":
             return False
         elif self.resource != "None" and type != "Extractor":
+            return False
+        elif self.type == "Exit":
+            return False
+        elif self.resource == "None" and type == "Extractor":
             return False
         return True
 
@@ -384,6 +388,9 @@ class Splitter(Belt):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
+        self.image = pg.transform.scale(pg.image.load("sprites\\Splitter.png"), (TILE_SIZE, TILE_SIZE))
+        if ghost:
+            self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
         # Alternates between left and right
