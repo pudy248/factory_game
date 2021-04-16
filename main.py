@@ -21,7 +21,8 @@ TICK_RATE = 2  # ticks per second
 
 
 class Level:
-    def __init__(self, tMap, g):
+    def __init__(self, tMap, g, n):
+        self.number = n
         self.tile_array = tMap
         self.length = len(self.tile_array)
         self.goal = g
@@ -48,6 +49,10 @@ class Level:
                                         (i.offset * i.direction[0] * TILE_SIZE),
                                         self.tile_array[tiley][tilex].pos[1] * TILE_SIZE + TILE_SIZE / 4 - (
                                                 i.offset * i.direction[1] * TILE_SIZE)))
+
+    def next_level(self):
+        global load
+        return load.load_level(self.number + 1)
 
 
 class Loader:
@@ -108,7 +113,7 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Oil")
                 else:
                     newMap[y][x] = Tile(pos, 0, "None")
-        return Level(newMap, g)
+        return Level(newMap, g, self.lNum)
 
 
 class Item:
@@ -415,6 +420,7 @@ class Exit(Tile):
         self.dt = 0
 
     def tick(self):
+        global level
         self.dt += time.perf_counter() - self.t
         self.t = time.perf_counter()
         if self.dt > 10 / TICK_RATE:
@@ -426,6 +432,7 @@ class Exit(Tile):
                     temp_item_num += 1
             if temp_item_num >= 10:
                 print("done")
+                level = level.next_level()
             self.items = []
 
 
