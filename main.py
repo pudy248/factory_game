@@ -104,7 +104,7 @@ class Loader:
                 elif str == 'E':
                     newMap[y][x] = Exit(pos, 0, "None")
                 elif str == 'I':
-                    newMap[y][x] = Tile(pos, 0, "Iron")
+                    newMap[y][x] = Tile(pos, 0, "Iron Ore")
                 elif str == 'W':
                     newMap[y][x] = Tile(pos, 0, "Wood")
                 elif str == 'C':
@@ -212,6 +212,10 @@ class Tile:
         if self.resource == "Out of Bounds":
             return False
         elif self.resource != "None" and type != "Extractor":
+            return False
+        elif self.type == "Exit":
+            return False
+        elif self.resource == "None" and type == "Extractor":
             return False
         return True
 
