@@ -188,7 +188,6 @@ class Tile:
                     i += 1
 
     def is_open(self, type):
-        return True
         if self.resource == "Out of Bounds":
             return False
         elif self.resource != "None" and type != "Extractor":
