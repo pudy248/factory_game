@@ -211,7 +211,9 @@ class Tile:
     def is_open(self, type):
         if self.resource == "Out of Bounds":
             return False
-        elif self.resource != "None" and type != "Extractor":
+        elif self.resource in ["Wood", "Oil", "Iron Ore", "Coal"] and type != "Extractor":
+            return False
+        elif self.resource not in ["Wood", "Oil", "Iron Ore", "Coal"] and type == "Extractor":
             return False
         elif self.type == "Exit":
             return False
@@ -317,14 +319,15 @@ class Manufacturer(Tile):
                 recipe = rc.get_recipe(self.items)
                 for i in recipe.inputs:
                     for index in range(len(self.items)):
-                        if self.items[index].name == i and not self.items[index].manufactured:
+                        if self.items[index].name == i:
                             self.items.pop(index)
                             break
                 outputs = recipe.get_outputs()
                 for item in outputs:
                     item.manufactured = True
                 self.items.extend(outputs)
-                print(self.items[-1].name)
+                for i in self.items:
+                    print(i.name)
         for i in self.items:
             if i.manufactured:
                 i.offset += TICK_RATE / FPS
@@ -461,9 +464,7 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(6) # 0.txt is just a dummy for testing
-# level.tile_array[0][0].items.append(Item("Iron Ore"))
-# level.tile_array[1][0].items.append(Item("Wood"))
+level = load.load_level(7) # 0.txt is just a dummy for testing
 player = Player()
 while True:
     level.world_tick()
