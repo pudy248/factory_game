@@ -144,16 +144,13 @@ class Recipe:
         return temp
 
     def check_inputs(self, inputs):
-        if len(inputs) != len(self.inputs):
-            return False
-        else:
+        for j in self.inputs:
+            contained = False
             for i in inputs:
-                contained = False
-                for j in self.inputs:
-                    if i.name == j and not i.manufactured:
-                        contained = True
-                if not contained:
-                    return False
+                if i.name == j and not i.manufactured:
+                    contained = True
+            if not contained:
+                return False
         return True
 
 
