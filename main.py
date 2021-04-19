@@ -182,7 +182,7 @@ class Tile:
 
     def draw(self):
         SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))),
-                  (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
+                  (int(SURF.get_width()/2 + (self.pos[0] - len(level.tile_array[0])/2) * TILE_SIZE), int(SURF.get_height()/2 + (self.pos[1] - len(level.tile_array)/2) * TILE_SIZE)))
 
     def tick(self):
         if self.type != "Tile":
@@ -458,7 +458,7 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(6) # 0.txt is just a dummy for testing
+level = load.load_level(0) # 0.txt is just a dummy for testing
 # level.tile_array[0][0].items.append(Item("Iron Ore"))
 # level.tile_array[1][0].items.append(Item("Wood"))
 player = Player()
