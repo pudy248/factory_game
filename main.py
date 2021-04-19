@@ -104,7 +104,7 @@ class Loader:
                 elif str == 'E':
                     newMap[y][x] = Exit(pos, 0, "None")
                 elif str == 'I':
-                    newMap[y][x] = Tile(pos, 0, "Iron")
+                    newMap[y][x] = Tile(pos, 0, "Iron Ore")
                 elif str == 'W':
                     newMap[y][x] = Tile(pos, 0, "Wood")
                 elif str == 'C':
@@ -211,7 +211,9 @@ class Tile:
     def is_open(self, type):
         if self.resource == "Out of Bounds":
             return False
-        elif self.resource != "None" and type != "Extractor":
+        elif self.resource in ["Wood", "Oil", "Iron Ore", "Coal"] and type != "Extractor":
+            return False
+        elif self.resource not in ["Wood", "Oil", "Iron Ore", "Coal"] and type == "Extractor":
             return False
         return True
 
@@ -455,9 +457,7 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(6) # 0.txt is just a dummy for testing
-# level.tile_array[0][0].items.append(Item("Iron Ore"))
-# level.tile_array[1][0].items.append(Item("Wood"))
+level = load.load_level(7) # 0.txt is just a dummy for testing
 player = Player()
 while True:
     level.world_tick()
