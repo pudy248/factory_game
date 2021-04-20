@@ -1,4 +1,4 @@
-X - - X
-O - - E
-X - - X
+X X - - -
+O - - - -
+X X - - E
 Plastic

@@ -1,4 +1,6 @@
-I - - - -
-O - - - -
-C - - - E
+I - W - X X
+C - - - - X
+- - - - - X
+O - - - - X
+- - - - - E
 Consumer Goods
