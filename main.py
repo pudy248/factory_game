@@ -14,7 +14,7 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 #####CONSTANTS#####
 FPS = 60
 TILE_SIZE = 100  # dimensions of each tile in pixels
-TICK_RATE = 2  # ticks per second
+TICK_RATE = 1  # ticks per second
 
 
 #####################
@@ -213,7 +213,9 @@ class Tile:
     def is_open(self, type):
         if self.resource == "Out of Bounds":
             return False
-        elif self.resource != "None" and type != "Extractor":
+        elif self.resource in ["Wood", "Oil", "Iron Ore", "Coal"] and type != "Extractor":
+            return False
+        elif self.resource not in ["Wood", "Oil", "Iron Ore", "Coal"] and type == "Extractor":
             return False
         elif self.type == "Exit":
             return False
@@ -282,7 +284,7 @@ class Player:
         elif key == pg.K_5:
             self.selected_tile = "Splitter"
         elif key == pg.K_6:
-            self.selected_tile = "Tile"
+            self.selected_tile = "Void"
         elif key == pg.K_r:
             self.tile_angle = (self.tile_angle - 90) % 360
 
@@ -294,14 +296,12 @@ class Extractor(Tile):
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
-        self.t = time.perf_counter()
         self.dt = 0
 
     def tick(self):
         # adds an item based on resources
         super(Extractor, self).tick()
-        self.dt += time.perf_counter() - self.t
-        self.t = time.perf_counter()
+        self.dt += 1 / FPS * TICK_RATE
         if self.dt > 1 / TICK_RATE:
             self.items.append(Item(self.resource))
             self.dt -= 1 / TICK_RATE
@@ -312,28 +312,25 @@ class Manufacturer(Tile):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Manufacturer"
         self.image = pg.transform.scale(pg.image.load("sprites\\tile_factory.png"), (TILE_SIZE, TILE_SIZE))
-        self.t = time.perf_counter()
         self.dt = 0
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
         # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
-        self.dt += time.perf_counter() - self.t
-        self.t = time.perf_counter()
+        self.dt += 1 / FPS * TICK_RATE
         if self.dt > 1 / TICK_RATE:
             if rc.get_recipe(self.items):
                 recipe = rc.get_recipe(self.items)
                 for i in recipe.inputs:
                     for index in range(len(self.items)):
-                        if self.items[index].name == i and not self.items[index].manufactured:
+                        if self.items[index].name == i:
                             self.items.pop(index)
                             break
                 outputs = recipe.get_outputs()
                 for item in outputs:
                     item.manufactured = True
                 self.items.extend(outputs)
-                print(self.items[-1].name)
         for i in self.items:
             if i.manufactured:
                 i.offset += TICK_RATE / FPS
@@ -426,9 +423,12 @@ class Splitter(Belt):
 
 
 class Void(Tile):
-    def __init__(self, pos, angle, resource):
-        super().__init__(pos, angle, resource)
+    def __init__(self, pos, angle, resource, ghost=False):
+        super().__init__(pos, angle, resource, ghost)
         self.type = "Void"
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
+        if ghost:
+            self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
         self.items = []
@@ -439,13 +439,11 @@ class Exit(Tile):
         super().__init__(pos, angle, resource)
         self.image = pg.transform.scale(pg.image.load("sprites\\Alloy Plate.png"), (TILE_SIZE, TILE_SIZE))
         self.type = "Exit"
-        self.t = 0
         self.dt = 0
 
     def tick(self):
         global level
-        self.dt += time.perf_counter() - self.t
-        self.t = time.perf_counter()
+        self.dt += 1 / FPS * TICK_RATE
         if self.dt > 10 / TICK_RATE:
             self.items.append(Item(self.resource))
             self.dt -= 10 / TICK_RATE
@@ -453,6 +451,10 @@ class Exit(Tile):
             for i in self.items:
                 if i.name == level.goal:
                     temp_item_num += 1
+                elif i.name != "None":
+                    self.items = []
+                    temp_item_num = 0
+                    print("REJECTED")
             if temp_item_num >= 10:
                 print("done")
                 level = level.next_level()
@@ -470,9 +472,7 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(0) # 0.txt is just a dummy for testing
-# level.tile_array[0][0].items.append(Item("Iron Ore"))
-# level.tile_array[1][0].items.append(Item("Wood"))
+level = load.load_level(5)  # 0.txt is just a dummy for testing
 player = Player()
 while True:
     level.world_tick()
