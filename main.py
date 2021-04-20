@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-
+import math
 import pygame as pg
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -45,9 +45,9 @@ class Level:
                         self.tile_array[tiley][tilex].items) > 0:  # change back to and
                     for i in self.tile_array[tiley][tilex].items:
                         img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
-                        SURF.blit(img, (self.tile_array[tiley][tilex].pos[0] * TILE_SIZE + TILE_SIZE / 4 +
+                        SURF.blit(img, (self.tile_array[tiley][tilex].get_x() + TILE_SIZE / 4 +
                                         (i.offset * i.direction[0] * TILE_SIZE),
-                                        self.tile_array[tiley][tilex].pos[1] * TILE_SIZE + TILE_SIZE / 4 - (
+                                        self.tile_array[tiley][tilex].get_y() + TILE_SIZE / 4 - (
                                                 i.offset * i.direction[1] * TILE_SIZE)))
 
     def next_level(self):
@@ -180,9 +180,14 @@ class Tile:
     def __str__(self):
         return str(self.type) + ": " + str(self.pos)
 
+    def get_x(self):
+        return(math.floor(SURF.get_width()/2 + (self.pos[0] - len(level.tile_array[0])/2) * TILE_SIZE))
+
+    def get_y(self):
+        return(math.floor(SURF.get_height()/2 + (self.pos[1] - len(level.tile_array)/2) * TILE_SIZE))
+
     def draw(self):
-        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))),
-                  (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
+        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))), (self.get_x(), self.get_y()))
 
     def tick(self):
         if self.type != "Tile":
@@ -227,27 +232,34 @@ class Player:
         self.ghost_tile = Tile(self.last_pos, 0, "None")
 
     def is_in_level(self):  # Detects if pos is within the level
-        return self.last_pos[0] < TILE_SIZE * len(level.tile_array[0]) and self.last_pos[1] < TILE_SIZE * len(
-            level.tile_array)
+        return self.get_x() < TILE_SIZE and self.get_y() < TILE_SIZE
 
     def can_place(self):  # should work
-        return self.selected_tile and self.get_tile().is_open(self.selected_tile)
+        return self.selected_tile and self.get_tile() and self.get_tile().is_open(self.selected_tile)
 
     def get_tile(self):  # works
-        return level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE]
+        if -1 < self.get_y() < len(level.tile_array) and -1 < self.get_x() < len(level.tile_array[0]):
+            return level.tile_array[self.get_y()][self.get_x()]
+        return False
+
+    def get_x(self):
+        return(math.floor((self.last_pos[0] - SURF.get_width()/2)/TILE_SIZE + len(level.tile_array[0])/2))
+
+    def get_y(self):
+        return(math.floor((self.last_pos[1] - SURF.get_height()/2)/TILE_SIZE + len(level.tile_array)/2))
 
     def place(self):  # works
-        level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = sys.modules[
+        level.tile_array[self.get_y()][self.get_x()] = sys.modules[
             __name__].__getattribute__(self.selected_tile)(
-            [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle,
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].resource)
+            [self.get_x(), (self.get_y())], self.tile_angle,
+            level.tile_array[self.get_y()][self.get_x()].resource)
 
     def remove(self, pos):
         self.last_pos = pos
-        if level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].type != "Exit":
-            level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE] = Tile(
-                [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle,
-                level.tile_array[self.last_pos[1] // TILE_SIZE][self.last_pos[0] // TILE_SIZE].resource)
+        if self.get_tile() and level.tile_array[self.get_y()][self.get_x()].type != "Exit":
+            level.tile_array[self.get_y()][self.get_x()] = Tile(
+                [self.get_x(), self.get_y()], self.tile_angle,
+                level.tile_array[self.get_y()][self.get_x()].resource)
 
     def click(self, pos):
         self.last_pos = pos
@@ -258,7 +270,7 @@ class Player:
     def move(self, pos):
         self.last_pos = pos
         self.ghost_tile = sys.modules[__name__].__getattribute__(self.selected_tile)(
-            [(self.last_pos[0] // TILE_SIZE), (self.last_pos[1] // TILE_SIZE)], self.tile_angle, "None", True)
+            [self.get_x(), self.get_y()], self.tile_angle, "None", True)
 
     def select(self, key):
         if key == pg.K_1:
