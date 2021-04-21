@@ -1,6 +1,8 @@
 import math
 import os
 import sys
+import time
+import math
 
 import pygame as pg
 
@@ -13,9 +15,8 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
 #####CONSTANTS#####
 FPS = 60
-TILE_SIZE = 100  # dimensions of each tile in pixels
+TILE_SIZE = 50  # dimensions of each tile in pixels
 TICK_RATE = 1  # ticks per second
-
 
 #####################
 
@@ -175,10 +176,13 @@ class Tile:
     def __init__(self, pos, angle, resource, ghost=False):
         self.pos = pos
         self.direction = pg.Vector2([1, 0]).rotate(angle)
-        self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
+        self.resource = resource  # None, Iron, Wood, Coal, Oil, Out of Bounds
+        if self.resource in ["None", "Out of Bounds"]:
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
+        else:
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
-        self.resource = resource  # None, Iron, Wood, Coal, Oil, Out of Bounds
         self.type = "Tile"
         self.items = []
 
@@ -186,14 +190,13 @@ class Tile:
         return str(self.type) + ": " + str(self.pos)
 
     def get_x(self):
-        return (math.floor(SURF.get_width() / 2 + (self.pos[0] - len(level.tile_array[0]) / 2) * TILE_SIZE))
+        return(math.floor(SURF.get_width()/2 + (self.pos[0] - len(level.tile_array[0])/2) * TILE_SIZE))
 
     def get_y(self):
-        return (math.floor(SURF.get_height() / 2 + (self.pos[1] - len(level.tile_array) / 2) * TILE_SIZE))
+        return(math.floor(SURF.get_height()/2 + (self.pos[1] - len(level.tile_array)/2) * TILE_SIZE))
 
     def draw(self):
-        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))),
-                  (self.get_x(), self.get_y()))
+        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))), (self.get_x(), self.get_y()))
 
     def tick(self):
         if self.type != "Tile":
@@ -249,10 +252,10 @@ class Player:
         return False
 
     def get_x(self):
-        return (math.floor((self.last_pos[0] - SURF.get_width() / 2) / TILE_SIZE + len(level.tile_array[0]) / 2))
+        return(math.floor((self.last_pos[0] - SURF.get_width()/2)/TILE_SIZE + len(level.tile_array[0])/2))
 
     def get_y(self):
-        return (math.floor((self.last_pos[1] - SURF.get_height() / 2) / TILE_SIZE + len(level.tile_array) / 2))
+        return(math.floor((self.last_pos[1] - SURF.get_height()/2)/TILE_SIZE + len(level.tile_array)/2))
 
     def place(self):  # works
         level.tile_array[self.get_y()][self.get_x()] = sys.modules[
@@ -299,7 +302,11 @@ class Extractor(Tile):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Extractor"
-        self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
+        if self.resource in ["None", "Out of Bounds"]:
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
+        else:
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"),
+                                            (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
         self.dt = 0
@@ -478,13 +485,18 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(7)  # 0.txt is just a dummy for testing
+level = load.load_level(0)  # 0.txt is just a dummy for testing
 player = Player()
+t = time.perf_counter()
+fps_arr = [1 / FPS] * 30
 while True:
+    print(time.perf_counter() - t)
     level.world_tick()
     SURF.fill((0, 0, 0))
+    print(time.perf_counter() - t)
     level.draw_level()
     player.ghost_tile.draw()
+    print(time.perf_counter() - t)
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
@@ -496,6 +508,13 @@ while True:
                 player.click(event.pos)
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
+    f = pg.font.SysFont("Arial", 30)
+    r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
+    SURF.blit(r, (W - 50, H - 50))
     player.move(pg.mouse.get_pos())
     pg.display.update()
+    print(time.perf_counter() - t)
+    fps_arr.append(time.perf_counter() - t)
+    t = time.perf_counter()
+    fps_arr.pop(0)
     clock.tick(FPS)
