@@ -35,7 +35,6 @@ class Level:
                 self.tile_array[tiley][tilex].tick()
 
     def draw_level(self):
-        print("draw init", time.perf_counter() - t)
         if self.dirty:
             self.dirty = False
             self.surf = pg.Surface([len(self.tile_array[0]) * TILE_SIZE, self.length * TILE_SIZE])
@@ -44,7 +43,6 @@ class Level:
                 for tilex in range(width):
                     self.tile_array[tiley][tilex].blit(self.surf)
         SURF.blit(self.surf, [(SURF.get_width() - self.surf.get_width()) / 2, (SURF.get_height() - self.surf.get_height()) / 2])
-        print(time.perf_counter() - t)
         for tiley in range(self.length):
             width = len(self.tile_array[tiley])
             for tilex in range(width):
@@ -56,7 +54,6 @@ class Level:
                                         (i.offset * i.direction[0] * TILE_SIZE),
                                         self.tile_array[tiley][tilex].get_y() + TILE_SIZE / 4 - (
                                                 i.offset * i.direction[1] * TILE_SIZE)))
-        print("end", time.perf_counter() - t)
 
     def next_level(self):
         global load
@@ -504,13 +501,10 @@ player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
 while True:
-    print(time.perf_counter() - t)
     level.world_tick()
     SURF.fill((0, 0, 0))
-    print(time.perf_counter() - t)
     level.draw_level()
     player.ghost_tile.draw()
-    print(time.perf_counter() - t)
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
@@ -522,12 +516,11 @@ while True:
                 player.click(event.pos)
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
-    f = pg.font.SysFont("Arial", 30)
+    f = pg.font.SysFont("Arial", 15)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
-    SURF.blit(r, (W - 50, H - 50))
+    SURF.blit(r, (5, 5))
     player.move(pg.mouse.get_pos())
     pg.display.update()
-    print(time.perf_counter() - t)
     fps_arr.append(time.perf_counter() - t)
     t = time.perf_counter()
     fps_arr.pop(0)
