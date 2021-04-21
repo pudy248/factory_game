@@ -152,17 +152,33 @@ class Recipe:
                 return False
         return True
 
+    def get_image(self):
+        temp_surf = pg.Surface((int(TILE_SIZE * 2.5), TILE_SIZE/2))
+        temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE//2, TILE_SIZE//2)), (TILE_SIZE, 0))
+        for i in range(len(self.outputs)):
+            temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\" + self.outputs[i] + ".png"), (TILE_SIZE//2, TILE_SIZE//2)), ((i+3) * TILE_SIZE//2, 0))
+        for i in range(len(self.inputs)):
+            temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\" + self.inputs[i] + ".png"), (TILE_SIZE//2, TILE_SIZE//2)), ((1-i) * TILE_SIZE//2, 0))
+        return temp_surf
+
 
 class RecipeCollection:
     def __init__(self, recipes):
         self.recipes = []
         self.recipes.extend(recipes)
+        self.image = self.get_image()
 
     def get_recipe(self, inputs):
         for r in self.recipes:
             if r.check_inputs(inputs):
                 return r
         return False
+
+    def get_image(self):
+        temp_surf = pg.Surface((int(TILE_SIZE*2.5), (TILE_SIZE//2)*len(self.recipes)))
+        for i in range(len(self.recipes)):
+            temp_surf.blit(self.recipes[i].get_image(), (0, i*TILE_SIZE//2))
+        return temp_surf
 
 
 class Tile:
@@ -488,6 +504,7 @@ while True:
     SURF.fill((0, 0, 0))
     print(time.perf_counter() - t)
     level.draw_level()
+    SURF.blit(rc.image, (0, 0))
     player.ghost_tile.draw()
     print(time.perf_counter() - t)
     for event in pg.event.get():
