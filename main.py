@@ -1,7 +1,9 @@
+import math
 import os
 import sys
 import time
 import math
+
 import pygame as pg
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -24,14 +26,14 @@ class Level:
         self.number = n
         self.tile_array = tMap
         self.length = len(self.tile_array)
+        self.width = len(self.tile_array[0])
         self.goal = g
         self.surf = pg.Surface([0, 0])
         self.dirty = True
 
     def world_tick(self):
         for tiley in range(self.length):
-            width = len(self.tile_array[tiley])
-            for tilex in range(width):
+            for tilex in range(self.width):
                 self.tile_array[tiley][tilex].tick()
 
     def draw_level(self):
@@ -42,10 +44,16 @@ class Level:
                 width = len(self.tile_array[tiley])
                 for tilex in range(width):
                     self.tile_array[tiley][tilex].blit(self.surf)
+                    if self.tile_array[tiley][tilex].type == "Exit":
+                        ex = self.tile_array[tiley][tilex]
+                        gl = Item(self.goal)
+                        img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
+                        img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
+                        self.surf.blit(img, (ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
+                                        ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
         SURF.blit(self.surf, [(SURF.get_width() - self.surf.get_width()) / 2, (SURF.get_height() - self.surf.get_height()) / 2])
         for tiley in range(self.length):
-            width = len(self.tile_array[tiley])
-            for tilex in range(width):
+            for tilex in range(self.width):
                 if self.tile_array[tiley][tilex].type == "Belt" or len(
                         self.tile_array[tiley][tilex].items) > 0:  # change back to and
                     for i in self.tile_array[tiley][tilex].items:
@@ -496,7 +504,7 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(0)  # 0.txt is just a dummy for testing
+level = load.load_level(1)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
