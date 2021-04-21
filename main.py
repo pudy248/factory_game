@@ -15,7 +15,7 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
 #####CONSTANTS#####
 FPS = 60
-TILE_SIZE = 50  # dimensions of each tile in pixels
+TILE_SIZE = 100  # dimensions of each tile in pixels
 TICK_RATE = 1  # ticks per second
 
 #####################
@@ -28,6 +28,8 @@ class Level:
         self.length = len(self.tile_array)
         self.width = len(self.tile_array[0])
         self.goal = g
+        self.surf = pg.Surface([0, 0])
+        self.dirty = True
 
     def world_tick(self):
         for tiley in range(self.length):
@@ -35,16 +37,21 @@ class Level:
                 self.tile_array[tiley][tilex].tick()
 
     def draw_level(self):
-        for tiley in range(self.length):
-            for tilex in range(self.width):
-                self.tile_array[tiley][tilex].draw()
-                if self.tile_array[tiley][tilex].type == "Exit":
+        if self.dirty:
+            self.dirty = False
+            self.surf = pg.Surface([len(self.tile_array[0]) * TILE_SIZE, self.length * TILE_SIZE])
+            for tiley in range(self.length):
+                width = len(self.tile_array[tiley])
+                for tilex in range(width):
+                    self.tile_array[tiley][tilex].blit(self.surf)
+                    if self.tile_array[tiley][tilex].type == "Exit":
                     ex = self.tile_array[tiley][tilex]
                     gl = Item(self.goal)
                     img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
                     img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
-                    SURF.blit(img, (ex.get_x() + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
-                                    ex.get_y() + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
+                    self.surf.blit(img, (ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
+                                    ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
+        SURF.blit(self.surf, [(SURF.get_width() - self.surf.get_width()) / 2, (SURF.get_height() - self.surf.get_height()) / 2])
         for tiley in range(self.length):
             for tilex in range(self.width):
                 if self.tile_array[tiley][tilex].type == "Belt" or len(
@@ -183,6 +190,7 @@ class Tile:
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
+        self.image_rot = []
         self.type = "Tile"
         self.items = []
 
@@ -195,8 +203,17 @@ class Tile:
     def get_y(self):
         return(math.floor(SURF.get_height()/2 + (self.pos[1] - len(level.tile_array)/2) * TILE_SIZE))
 
+    def blit(self, surf):
+        if len(self.image_rot) == 0:
+            self.image_rot = [pg.transform.rotate(self.image, 0), pg.transform.rotate(self.image, 270),
+                              pg.transform.rotate(self.image, 180), pg.transform.rotate(self.image, 90)]
+        surf.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)], (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
+
     def draw(self):
-        SURF.blit(pg.transform.rotate(self.image, -self.direction.angle_to(pg.Vector2([1, 0]))), (self.get_x(), self.get_y()))
+        if len(self.image_rot) == 0:
+            self.image_rot = [pg.transform.rotate(self.image, 0), pg.transform.rotate(self.image, 270),
+                              pg.transform.rotate(self.image, 180), pg.transform.rotate(self.image, 90)]
+        SURF.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)], (self.get_x(), self.get_y()))
 
     def tick(self):
         if self.type != "Tile":
@@ -258,12 +275,14 @@ class Player:
         return(math.floor((self.last_pos[1] - SURF.get_height()/2)/TILE_SIZE + len(level.tile_array)/2))
 
     def place(self):  # works
+        level.dirty = True
         level.tile_array[self.get_y()][self.get_x()] = sys.modules[
             __name__].__getattribute__(self.selected_tile)(
             [self.get_x(), (self.get_y())], self.tile_angle,
             level.tile_array[self.get_y()][self.get_x()].resource)
 
     def remove(self, pos):
+        level.dirty = True
         self.last_pos = pos
         if self.get_tile() and level.tile_array[self.get_y()][self.get_x()].type != "Exit":
             level.tile_array[self.get_y()][self.get_x()] = Tile(
@@ -490,13 +509,10 @@ player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
 while True:
-    print(time.perf_counter() - t)
     level.world_tick()
     SURF.fill((0, 0, 0))
-    print(time.perf_counter() - t)
     level.draw_level()
     player.ghost_tile.draw()
-    print(time.perf_counter() - t)
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             pg.quit()
@@ -508,12 +524,11 @@ while True:
                 player.click(event.pos)
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
-    f = pg.font.SysFont("Arial", 30)
+    f = pg.font.SysFont("Arial", 15)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
-    SURF.blit(r, (W - 50, H - 50))
+    SURF.blit(r, (5, 5))
     player.move(pg.mouse.get_pos())
     pg.display.update()
-    print(time.perf_counter() - t)
     fps_arr.append(time.perf_counter() - t)
     t = time.perf_counter()
     fps_arr.pop(0)
