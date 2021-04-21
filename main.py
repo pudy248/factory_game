@@ -1,8 +1,7 @@
-import math
 import os
 import sys
 import time
-
+import math
 import pygame as pg
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -25,19 +24,18 @@ class Level:
         self.number = n
         self.tile_array = tMap
         self.length = len(self.tile_array)
-        self.width = len(self.tile_array[0])
         self.goal = g
         self.surf = pg.Surface([0, 0])
         self.dirty = True
-        self.time = 0
 
     def world_tick(self):
         for tiley in range(self.length):
-            for tilex in range(self.width):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 self.tile_array[tiley][tilex].tick()
-        self.time += sum(fps_arr) / 30
 
     def draw_level(self):
+        print("draw init", time.perf_counter() - t)
         if self.dirty:
             self.dirty = False
             self.surf = pg.Surface([len(self.tile_array[0]) * TILE_SIZE, self.length * TILE_SIZE])
@@ -45,18 +43,11 @@ class Level:
                 width = len(self.tile_array[tiley])
                 for tilex in range(width):
                     self.tile_array[tiley][tilex].blit(self.surf)
-                    if self.tile_array[tiley][tilex].type == "Exit":
-                        ex = self.tile_array[tiley][tilex]
-                        gl = Item(self.goal)
-                        img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
-                        img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
-                        self.surf.blit(img, (
-                        ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
-                        ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
-        SURF.blit(self.surf,
-                  [(SURF.get_width() - self.surf.get_width()) / 2, (SURF.get_height() - self.surf.get_height()) / 2])
+        SURF.blit(self.surf, [(SURF.get_width() - self.surf.get_width()) / 2, (SURF.get_height() - self.surf.get_height()) / 2])
+        print(time.perf_counter() - t)
         for tiley in range(self.length):
-            for tilex in range(self.width):
+            width = len(self.tile_array[tiley])
+            for tilex in range(width):
                 if self.tile_array[tiley][tilex].type == "Belt" or len(
                         self.tile_array[tiley][tilex].items) > 0:  # change back to and
                     for i in self.tile_array[tiley][tilex].items:
@@ -65,12 +56,10 @@ class Level:
                                         (i.offset * i.direction[0] * TILE_SIZE),
                                         self.tile_array[tiley][tilex].get_y() + TILE_SIZE / 4 - (
                                                 i.offset * i.direction[1] * TILE_SIZE)))
+        print("end", time.perf_counter() - t)
 
     def next_level(self):
-        global load, score, hiScore
-        score += 100000 * (level.number ** 3) / (level.time - 15)
-        if (100000 * (level.number ** 3) / (level.time - 15)) > hiScore:
-            hiScore = 100000 * (level.number ** 3) / (level.time - 15)
+        global load
         return load.load_level(self.number + 1)
 
 
@@ -510,26 +499,20 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(1)  # 0.txt is just a dummy for testing
+level = load.load_level(0)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
-score = 0
-hiScore = 0
 while True:
+    print(time.perf_counter() - t)
     level.world_tick()
     SURF.fill((0, 0, 0))
+    print(time.perf_counter() - t)
     level.draw_level()
     player.ghost_tile.draw()
-    if score > int(open("highscore.txt").read()):
-        hiScore = score
-    else:
-        hiScore = int(open("highscore.txt").read())
+    print(time.perf_counter() - t)
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-            if score > int(open("highscore.txt").read()):
-                hsFile = open("highscore.txt", "w")
-                hsFile.write(str(int(score)))
             pg.quit()
             sys.exit()
         elif event.type == pg.KEYDOWN:
@@ -539,14 +522,12 @@ while True:
                 player.click(event.pos)
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
-    f = pg.font.SysFont("Arial", 15)
+    f = pg.font.SysFont("Arial", 30)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
-    SURF.blit(r, (5, 5))
-    SURF.blit(f.render("Time: " + str(int(level.time)), True, pg.Color("white")), (200, 5))
-    SURF.blit(f.render("Score: " + str(int(score)), True, pg.Color("white")), (400, 5))
-    SURF.blit(f.render("High Score: " + str(int(hiScore)), True, pg.Color("white")), (600, 5))
+    SURF.blit(r, (W - 50, H - 50))
     player.move(pg.mouse.get_pos())
     pg.display.update()
+    print(time.perf_counter() - t)
     fps_arr.append(time.perf_counter() - t)
     t = time.perf_counter()
     fps_arr.pop(0)
