@@ -168,7 +168,8 @@ class Recipe:
 
     def get_image(self):
         temp_surf = pg.Surface((int(TILE_SIZE * 2.5), TILE_SIZE/2))
-        temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE//2, TILE_SIZE//2)), (TILE_SIZE, 0))
+        temp_surf.fill((100, 100, 100))
+        temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE//2, TILE_SIZE//2)), (TILE_SIZE, 0))
         for i in range(len(self.outputs)):
             temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\" + self.outputs[i] + ".png"), (TILE_SIZE//2, TILE_SIZE//2)), ((i+3) * TILE_SIZE//2, 0))
         for i in range(len(self.inputs)):
@@ -190,6 +191,7 @@ class RecipeCollection:
 
     def get_image(self):
         temp_surf = pg.Surface((int(TILE_SIZE*2.5), (TILE_SIZE//2)*len(self.recipes)))
+        temp_surf.fill((100, 100, 100))
         for i in range(len(self.recipes)):
             temp_surf.blit(self.recipes[i].get_image(), (0, i*TILE_SIZE//2))
         return temp_surf
