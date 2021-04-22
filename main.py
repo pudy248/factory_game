@@ -2,7 +2,6 @@ import math
 import os
 import sys
 import time
-import math
 
 import pygame as pg
 
@@ -30,11 +29,13 @@ class Level:
         self.goal = g
         self.surf = pg.Surface([0, 0])
         self.dirty = True
+        self.time = 0
 
     def world_tick(self):
         for tiley in range(self.length):
             for tilex in range(self.width):
                 self.tile_array[tiley][tilex].tick()
+        self.time += sum(fps_arr) / 30
 
     def draw_level(self):
         if self.dirty:
@@ -49,9 +50,11 @@ class Level:
                         gl = Item(self.goal)
                         img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
                         img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
-                        self.surf.blit(img, (ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
-                                        ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
-        SURF.blit(self.surf, [(SURF.get_width() - self.surf.get_width()) / 2, (SURF.get_height() - self.surf.get_height()) / 2])
+                        self.surf.blit(img, (
+                        ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
+                        ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
+        SURF.blit(self.surf,
+                  [(SURF.get_width() - self.surf.get_width()) / 2, (SURF.get_height() - self.surf.get_height()) / 2])
         for tiley in range(self.length):
             for tilex in range(self.width):
                 if self.tile_array[tiley][tilex].type == "Belt" or len(
@@ -64,7 +67,10 @@ class Level:
                                                 i.offset * i.direction[1] * TILE_SIZE)))
 
     def next_level(self):
-        global load
+        global load, score, hiScore
+        score += 100000 * (level.number ** 3) / (level.time - 15)
+        if (100000 * (level.number ** 3) / (level.time - 15)) > hiScore:
+            hiScore = 100000 * (level.number ** 3) / (level.time - 15)
         return load.load_level(self.number + 1)
 
 
@@ -508,6 +514,8 @@ level = load.load_level(1)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
+score = 0
+hiScore = 0
 while True:
     level.world_tick()
     SURF.fill((0, 0, 0))
@@ -527,6 +535,9 @@ while True:
     f = pg.font.SysFont("Arial", 15)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
     SURF.blit(r, (5, 5))
+    SURF.blit(f.render("Time: " + str(int(level.time)), True, pg.Color("white")), (200, 5))
+    SURF.blit(f.render("Score: " + str(int(score)), True, pg.Color("white")), (400, 5))
+    SURF.blit(f.render("High Score: " + str(int(hiScore)), True, pg.Color("white")), (600, 5))
     player.move(pg.mouse.get_pos())
     pg.display.update()
     fps_arr.append(time.perf_counter() - t)
