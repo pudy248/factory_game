@@ -180,11 +180,11 @@ class Recipe:
     def get_image(self):
         temp_surf = pg.Surface((int(TILE_SIZE * 2.5), TILE_SIZE/2))
         temp_surf.fill((100, 100, 100))
-        temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE//3, TILE_SIZE//3)), (TILE_SIZE + TILE_SIZE//12, TILE_SIZE//12))
+        temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE//3, TILE_SIZE//3)), (TILE_SIZE + TILE_SIZE//12, TILE_SIZE//12))
         for i in range(len(self.outputs)):
             pg.draw.rect(temp_surf, (125, 125, 125), ((i+3) * TILE_SIZE//2 + TILE_SIZE//24 - 1, TILE_SIZE//24 -1, 5*TILE_SIZE//12, 5*TILE_SIZE//12))
             pg.draw.rect(temp_surf, (150, 150, 150), ((i + 3) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 +1, 5 * TILE_SIZE // 12, 5 * TILE_SIZE // 12))
-            temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\" + self.outputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((i+3) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
+            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.outputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((i+3) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
         for i in range(len(self.inputs)):
             pg.draw.rect(temp_surf, (125, 125, 125), (
             (1-i) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
@@ -192,7 +192,7 @@ class Recipe:
             pg.draw.rect(temp_surf, (150, 150, 150), (
             (1-i) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
             5 * TILE_SIZE // 12))
-            temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\" + self.inputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((1-i) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
+            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.inputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((1-i) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
         return temp_surf
 
 
@@ -280,6 +280,8 @@ class Tile:
                     self.items.pop(i)
                 else:
                     i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
     def is_open(self, type):
         if self.resource == "Out of Bounds":
@@ -429,6 +431,8 @@ class Manufacturer(Tile):
                 self.items.pop(i)
             else:
                 i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
 
 class Belt(Tile):
@@ -468,6 +472,8 @@ class Intersection(Belt):
                 self.items.pop(i)
             else:
                 i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
 
 class Splitter(Belt):
@@ -503,6 +509,8 @@ class Splitter(Belt):
                 self.items.pop(i)
             else:
                 i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
 
 class Void(Tile):
