@@ -12,10 +12,12 @@ clock = pg.time.Clock()
 W = pg.display.Info().current_w
 H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
-
 #####CONSTANTS#####
 FPS = 60
-TILE_SIZE = 80  # dimensions of each tile in pixels
+if SURF.get_width()/20 > SURF.get_height()/10:
+    TILE_SIZE = SURF.get_height()//10 # dimensions of each tile in pixels
+else:
+    TILE_SIZE = SURF.get_width()//20
 TICK_RATE = 1  # ticks per second
 #####################
 
@@ -553,7 +555,7 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(10)  # 0.txt is just a dummy for testing
+level = load.load_level(7)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
