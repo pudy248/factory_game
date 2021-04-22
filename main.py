@@ -515,7 +515,7 @@ player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
 score = 0
-hiScore = 0
+hiScore = 0 # at present, high score indicates the highest score from the respective levels
 while True:
     level.world_tick()
     SURF.fill((0, 0, 0))
