@@ -193,8 +193,10 @@ class Tile:
         self.pos = pos
         self.direction = pg.Vector2([1, 0]).rotate(angle)
         self.resource = resource  # None, Iron, Wood, Coal, Oil, Out of Bounds
-        if self.resource in ["None", "Out of Bounds"]:
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
+        if self.resource == "None":
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
+        elif self.resource == "Out of Bounds":
+            self.image = pg.transform.scale(pg.image.load("sprites\\OOB.png"), (TILE_SIZE, TILE_SIZE))
         else:
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"),
                                             (TILE_SIZE, TILE_SIZE))
@@ -524,7 +526,7 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(1)  # 0.txt is just a dummy for testing
+level = load.load_level(9)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
