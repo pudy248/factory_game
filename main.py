@@ -15,7 +15,7 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
 #####CONSTANTS#####
 FPS = 60
-TILE_SIZE = 100  # dimensions of each tile in pixels
+TILE_SIZE = 80  # dimensions of each tile in pixels
 TICK_RATE = 1  # ticks per second
 #####################
 
@@ -175,17 +175,44 @@ class Recipe:
                 return False
         return True
 
+    def get_image(self):
+        temp_surf = pg.Surface((int(TILE_SIZE * 2.5), TILE_SIZE/2))
+        temp_surf.fill((100, 100, 100))
+        temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE//3, TILE_SIZE//3)), (TILE_SIZE + TILE_SIZE//12, TILE_SIZE//12))
+        for i in range(len(self.outputs)):
+            pg.draw.rect(temp_surf, (125, 125, 125), ((i+3) * TILE_SIZE//2 + TILE_SIZE//24 - 1, TILE_SIZE//24 -1, 5*TILE_SIZE//12, 5*TILE_SIZE//12))
+            pg.draw.rect(temp_surf, (150, 150, 150), ((i + 3) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 +1, 5 * TILE_SIZE // 12, 5 * TILE_SIZE // 12))
+            temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\" + self.outputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((i+3) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
+        for i in range(len(self.inputs)):
+            pg.draw.rect(temp_surf, (125, 125, 125), (
+            (1-i) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
+            5 * TILE_SIZE // 12))
+            pg.draw.rect(temp_surf, (150, 150, 150), (
+            (1-i) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
+            5 * TILE_SIZE // 12))
+            temp_surf.blit(pg.transform.scale(pg.image.load("sprites\\" + self.inputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((1-i) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
+        return temp_surf
+
 
 class RecipeCollection:
     def __init__(self, recipes):
         self.recipes = []
         self.recipes.extend(recipes)
+        self.image = self.get_image()
+        self.show_recipes = True
 
     def get_recipe(self, inputs):
         for r in self.recipes:
             if r.check_inputs(inputs):
                 return r
         return False
+
+    def get_image(self):
+        temp_surf = pg.Surface((int(TILE_SIZE*2.75), (TILE_SIZE//2)*len(self.recipes) + TILE_SIZE//4))
+        temp_surf.fill((50, 50, 50))
+        for i in range(len(self.recipes)):
+            temp_surf.blit(self.recipes[i].get_image(), (TILE_SIZE//8, i*TILE_SIZE//2 + TILE_SIZE//8))
+        return temp_surf
 
 
 class Tile:
@@ -526,7 +553,7 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(9)  # 0.txt is just a dummy for testing
+level = load.load_level(10)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
@@ -539,6 +566,8 @@ while True:
         level.world_tick()
         level.draw_level()
         player.ghost_tile.draw()
+        if rc.show_recipes:
+            SURF.blit(rc.image, (0, (SURF.get_height() - rc.image.get_height()) // 2))
     else:
         f = pg.font.SysFont("Arial", 30)
         r = f.render(tutorial_text, True, pg.Color("white"))
@@ -552,7 +581,10 @@ while True:
                 if event.key == pg.K_RETURN:
                     tutorial_cleared = True
             else:
-                player.select(event.key)
+                if event.key == pg.K_TAB:
+                    rc.show_recipes = not rc.show_recipes
+                else:
+                    player.select(event.key)
         elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared:
             if event.button == pg.BUTTON_LEFT:
                 player.click(event.pos)
