@@ -251,6 +251,8 @@ class Tile:
                     self.items.pop(i)
                 else:
                     i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
     def is_open(self, type):
         if self.resource == "Out of Bounds":
@@ -400,6 +402,8 @@ class Manufacturer(Tile):
                 self.items.pop(i)
             else:
                 i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
 
 class Belt(Tile):
@@ -439,6 +443,8 @@ class Intersection(Belt):
                 self.items.pop(i)
             else:
                 i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
 
 class Splitter(Belt):
@@ -474,6 +480,8 @@ class Splitter(Belt):
                 self.items.pop(i)
             else:
                 i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
 
 class Void(Tile):
