@@ -213,15 +213,13 @@ class Tile:
         if len(self.image_rot) == 0:
             self.image_rot = [pg.transform.rotate(self.image, 0), pg.transform.rotate(self.image, 270),
                               pg.transform.rotate(self.image, 180), pg.transform.rotate(self.image, 90)]
-        surf.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)],
-                  (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
+        surf.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)], (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
 
     def draw(self):
         if len(self.image_rot) == 0:
             self.image_rot = [pg.transform.rotate(self.image, 0), pg.transform.rotate(self.image, 270),
                               pg.transform.rotate(self.image, 180), pg.transform.rotate(self.image, 90)]
-        SURF.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)],
-                  (self.get_x(), self.get_y()))
+        SURF.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)], (self.get_x(), self.get_y()))
 
     def tick(self):
         if self.type != "Tile":
@@ -537,12 +535,9 @@ while True:
     f = pg.font.SysFont("Arial", 15)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
     SURF.blit(r, (5, 5))
-    r = f.render("Time: " + str(int(level.time)), True, pg.Color("white"))
-    SURF.blit(r, (200, 5))
-    r = f.render("Score: " + str(int(score)), True, pg.Color("white"))
-    SURF.blit(r, (400, 5))
-    r = f.render("High Score: " + str(int(hiScore)), True, pg.Color("white"))
-    SURF.blit(r, (600, 5))
+    SURF.blit(f.render("Time: " + str(int(level.time)), True, pg.Color("white")), (200, 5))
+    SURF.blit(f.render("Score: " + str(int(score)), True, pg.Color("white")), (400, 5))
+    SURF.blit(f.render("High Score: " + str(int(hiScore)), True, pg.Color("white")), (600, 5))
     player.move(pg.mouse.get_pos())
     pg.display.update()
     fps_arr.append(time.perf_counter() - t)
