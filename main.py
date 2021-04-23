@@ -11,12 +11,13 @@ clock = pg.time.Clock()
 W = pg.display.Info().current_w
 H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
-
 #####CONSTANTS#####
 FPS = 60
-TILE_SIZE = 100  # dimensions of each tile in pixels
+if SURF.get_width() / 20 > SURF.get_height() / 10:
+    TILE_SIZE = SURF.get_height() // 10  # dimensions of each tile in pixels
+else:
+    TILE_SIZE = SURF.get_width() // 20
 TICK_RATE = 1  # ticks per second
-
 #####################
 
 
@@ -172,11 +173,40 @@ class Recipe:
                 return False
         return True
 
+    def get_image(self):
+        temp_surf = pg.Surface((int(TILE_SIZE * 3), TILE_SIZE / 2))
+        temp_surf.fill((100, 100, 100))
+        temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE // 3, TILE_SIZE // 3)),
+                       ((TILE_SIZE * 3) // 2 + TILE_SIZE // 12, TILE_SIZE // 12))
+        for i in range(len(self.outputs)):
+            pg.draw.rect(temp_surf, (125, 125, 125), (
+            (i + 4) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
+            5 * TILE_SIZE // 12))
+            pg.draw.rect(temp_surf, (150, 150, 150), (
+            (i + 4) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
+            5 * TILE_SIZE // 12))
+            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.outputs[i] + ".png"),
+                                                    (TILE_SIZE // 3, TILE_SIZE // 3)),
+                           ((i + 4) * TILE_SIZE // 2 + TILE_SIZE // 12, TILE_SIZE // 12))
+        for i in range(len(self.inputs)):
+            pg.draw.rect(temp_surf, (125, 125, 125), (
+                (2 - i) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
+                5 * TILE_SIZE // 12))
+            pg.draw.rect(temp_surf, (150, 150, 150), (
+                (2 - i) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
+                5 * TILE_SIZE // 12))
+            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.inputs[i] + ".png"),
+                                                    (TILE_SIZE // 3, TILE_SIZE // 3)),
+                           ((2 - i) * TILE_SIZE // 2 + TILE_SIZE // 12, TILE_SIZE // 12))
+        return temp_surf
+
 
 class RecipeCollection:
     def __init__(self, recipes):
         self.recipes = []
         self.recipes.extend(recipes)
+        self.image = self.get_image()
+        self.show_recipes = True
 
     def get_recipe(self, inputs):
         for r in self.recipes:
@@ -184,16 +214,26 @@ class RecipeCollection:
                 return r
         return False
 
+    def get_image(self):
+        temp_surf = pg.Surface((int(TILE_SIZE * 3.25), (TILE_SIZE // 2) * len(self.recipes) + TILE_SIZE // 4))
+        temp_surf.fill((50, 50, 50))
+        for i in range(len(self.recipes)):
+            temp_surf.blit(self.recipes[i].get_image(), (TILE_SIZE // 8, i * TILE_SIZE // 2 + TILE_SIZE // 8))
+        return temp_surf
+
 
 class Tile:
     def __init__(self, pos, angle, resource, ghost=False):
         self.pos = pos
         self.direction = pg.Vector2([1, 0]).rotate(angle)
         self.resource = resource  # None, Iron, Wood, Coal, Oil, Out of Bounds
-        if self.resource in ["None", "Out of Bounds"]:
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
+        if self.resource == "None":
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
+        elif self.resource == "Out of Bounds":
+            self.image = pg.transform.scale(pg.image.load("sprites\\OOB.png"), (TILE_SIZE, TILE_SIZE))
         else:
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"), (TILE_SIZE, TILE_SIZE))
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"),
+                                            (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
         self.image_rot = []
@@ -204,22 +244,24 @@ class Tile:
         return str(self.type) + ": " + str(self.pos)
 
     def get_x(self):
-        return(math.floor(SURF.get_width()/2 + (self.pos[0] - len(level.tile_array[0])/2) * TILE_SIZE))
+        return (math.floor(SURF.get_width() / 2 + (self.pos[0] - len(level.tile_array[0]) / 2) * TILE_SIZE))
 
     def get_y(self):
-        return(math.floor(SURF.get_height()/2 + (self.pos[1] - len(level.tile_array)/2) * TILE_SIZE))
+        return (math.floor(SURF.get_height() / 2 + (self.pos[1] - len(level.tile_array) / 2) * TILE_SIZE))
 
     def blit(self, surf):
         if len(self.image_rot) == 0:
             self.image_rot = [pg.transform.rotate(self.image, 0), pg.transform.rotate(self.image, 270),
                               pg.transform.rotate(self.image, 180), pg.transform.rotate(self.image, 90)]
-        surf.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)], (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
+        surf.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)],
+                  (self.pos[0] * TILE_SIZE, self.pos[1] * TILE_SIZE))
 
     def draw(self):
         if len(self.image_rot) == 0:
             self.image_rot = [pg.transform.rotate(self.image, 0), pg.transform.rotate(self.image, 270),
                               pg.transform.rotate(self.image, 180), pg.transform.rotate(self.image, 90)]
-        SURF.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)], (self.get_x(), self.get_y()))
+        SURF.blit(self.image_rot[int((self.direction.angle_to(pg.Vector2([1, 0])) % 360) / 90)],
+                  (self.get_x(), self.get_y()))
 
     def tick(self):
         if self.type != "Tile":
@@ -239,8 +281,12 @@ class Tile:
                     temp.offset -= 1
                     level.tile_array[int(self.pos[1] - temp.direction.y)][
                         int(self.pos[0] + temp.direction.x)].items.append(temp)
+                elif self.items[i].offset > 2:
+                    self.items.pop(i)
                 else:
                     i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
     def is_open(self, type):
         if self.resource == "Out of Bounds":
@@ -275,10 +321,10 @@ class Player:
         return False
 
     def get_x(self):
-        return(math.floor((self.last_pos[0] - SURF.get_width()/2)/TILE_SIZE + len(level.tile_array[0])/2))
+        return (math.floor((self.last_pos[0] - SURF.get_width() / 2) / TILE_SIZE + len(level.tile_array[0]) / 2))
 
     def get_y(self):
-        return(math.floor((self.last_pos[1] - SURF.get_height()/2)/TILE_SIZE + len(level.tile_array)/2))
+        return (math.floor((self.last_pos[1] - SURF.get_height() / 2) / TILE_SIZE + len(level.tile_array) / 2))
 
     def place(self):  # works
         level.dirty = True
@@ -386,8 +432,12 @@ class Manufacturer(Tile):
                 temp.offset -= 1
                 level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(
                     temp)
+            elif self.items[i].offset > 2:
+                self.items.pop(i)
             else:
                 i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
 
 class Belt(Tile):
@@ -423,8 +473,12 @@ class Intersection(Belt):
                 temp.offset -= 1
                 level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(
                     temp)
+            elif self.items[i].offset > 2:
+                self.items.pop(i)
             else:
                 i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
 
 class Splitter(Belt):
@@ -456,8 +510,12 @@ class Splitter(Belt):
                 temp.offset -= 1
                 level.tile_array[int(self.pos[1] - temp.direction.y)][int(self.pos[0] + temp.direction.x)].items.append(
                     temp)
+            elif self.items[i].offset > 2:
+                self.items.pop(i)
             else:
                 i += 1
+        if len(self.items) > 10:
+            self.items = [self.items[0]]
 
 
 class Void(Tile):
@@ -499,21 +557,26 @@ class Exit(Tile):
             self.items = []
 
 
-rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
-                       Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Iron Bar"], ["Iron Tubes"]),
-                       Recipe(["Iron Tubes"], ["Screws"]),
-                       Recipe(["Steel Bar"], ["Steel Tubes"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
-                       Recipe(["Steel Tubes"], ["Springs"]), Recipe(["Screws", "Springs"], ["Machine Parts"]),
-                       Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
-                       Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
+rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
+                       Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
+                       Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
+                       Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
+                       Recipe(["Screws", "Springs"], ["Machine Parts"]),
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
-                       Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
+                       Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"]),
+                       Recipe(["Iron Bar"], ["Iron Tubes"]),
+                       Recipe(["Iron Tubes"], ["Screws"]),
+                       Recipe(["Steel Bar"], ["Steel Tubes"]),
+                       Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
 level = load.load_level(1)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
+tutorial_cleared = False
+tutorial_text = "[tutorial goes here, press enter to continue]"
+
 score = 0
 hiScore = 0
 while True:
@@ -521,12 +584,26 @@ while True:
     SURF.fill((0, 0, 0))
     level.draw_level()
     player.ghost_tile.draw()
+    if score > int(open("highscore.txt").read()):
+        hiScore = score
+    else:
+        hiScore = int(open("highscore.txt").read())
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+            if score > int(open("highscore.txt").read()):
+                hsFile = open("highscore.txt", "w")
+                hsFile.write(str(int(score)))
             pg.quit()
             sys.exit()
         elif event.type == pg.KEYDOWN:
-            player.select(event.key)
+            if not tutorial_cleared:
+                if event.key == pg.K_RETURN:
+                    tutorial_cleared = True
+            else:
+                if event.key == pg.K_TAB:
+                    rc.show_recipes = not rc.show_recipes
+                else:
+                    player.select(event.key)
         elif event.type == pg.MOUSEBUTTONUP:
             if event.button == pg.BUTTON_LEFT:
                 player.click(event.pos)
