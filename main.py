@@ -515,14 +515,21 @@ player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
 score = 0
-hiScore = 0 # at present, high score indicates the highest score from the respective levels
+hiScore = 0
 while True:
     level.world_tick()
     SURF.fill((0, 0, 0))
     level.draw_level()
     player.ghost_tile.draw()
+    if score > int(open("highscore.txt").read()):
+        hiScore = score
+    else:
+        hiScore = int(open("highscore.txt").read())
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+            if score > int(open("highscore.txt").read()):
+                hsFile = open("highscore.txt", "w")
+                hsFile.write(str(int(score)))
             pg.quit()
             sys.exit()
         elif event.type == pg.KEYDOWN:
