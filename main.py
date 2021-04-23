@@ -178,21 +178,21 @@ class Recipe:
         return True
 
     def get_image(self):
-        temp_surf = pg.Surface((int(TILE_SIZE * 2.5), TILE_SIZE/2))
+        temp_surf = pg.Surface((int(TILE_SIZE * 3), TILE_SIZE/2))
         temp_surf.fill((100, 100, 100))
-        temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE//3, TILE_SIZE//3)), (TILE_SIZE + TILE_SIZE//12, TILE_SIZE//12))
+        temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE//3, TILE_SIZE//3)), ((TILE_SIZE*3)//2 + TILE_SIZE//12, TILE_SIZE//12))
         for i in range(len(self.outputs)):
-            pg.draw.rect(temp_surf, (125, 125, 125), ((i+3) * TILE_SIZE//2 + TILE_SIZE//24 - 1, TILE_SIZE//24 -1, 5*TILE_SIZE//12, 5*TILE_SIZE//12))
-            pg.draw.rect(temp_surf, (150, 150, 150), ((i + 3) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 +1, 5 * TILE_SIZE // 12, 5 * TILE_SIZE // 12))
-            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.outputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((i+3) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
+            pg.draw.rect(temp_surf, (125, 125, 125), ((i+4) * TILE_SIZE//2 + TILE_SIZE//24 - 1, TILE_SIZE//24 -1, 5*TILE_SIZE//12, 5*TILE_SIZE//12))
+            pg.draw.rect(temp_surf, (150, 150, 150), ((i + 4) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 +1, 5 * TILE_SIZE // 12, 5 * TILE_SIZE // 12))
+            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.outputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((i+4) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
         for i in range(len(self.inputs)):
             pg.draw.rect(temp_surf, (125, 125, 125), (
-            (1-i) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
+            (2-i) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
             5 * TILE_SIZE // 12))
             pg.draw.rect(temp_surf, (150, 150, 150), (
-            (1-i) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
+            (2-i) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
             5 * TILE_SIZE // 12))
-            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.inputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((1-i) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
+            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.inputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((2-i) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
         return temp_surf
 
 
@@ -210,7 +210,7 @@ class RecipeCollection:
         return False
 
     def get_image(self):
-        temp_surf = pg.Surface((int(TILE_SIZE*2.75), (TILE_SIZE//2)*len(self.recipes) + TILE_SIZE//4))
+        temp_surf = pg.Surface((int(TILE_SIZE*3.25), (TILE_SIZE//2)*len(self.recipes) + TILE_SIZE//4))
         temp_surf.fill((50, 50, 50))
         for i in range(len(self.recipes)):
             temp_surf.blit(self.recipes[i].get_image(), (TILE_SIZE//8, i*TILE_SIZE//2 + TILE_SIZE//8))
@@ -552,18 +552,19 @@ class Exit(Tile):
             self.items = []
 
 
-rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
-                       Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Iron Bar"], ["Iron Tubes"]),
-                       Recipe(["Iron Tubes"], ["Screws"]),
-                       Recipe(["Steel Bar"], ["Steel Tubes"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
-                       Recipe(["Steel Tubes"], ["Springs"]), Recipe(["Screws", "Springs"], ["Machine Parts"]),
-                       Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
-                       Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
+rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
-                       Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
-                       Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
+                       Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
+                       Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
+                       Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
+                       Recipe(["Screws", "Springs"], ["Machine Parts"]), Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
+                       Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"]),
+                       Recipe(["Iron Bar"], ["Iron Tubes"]),
+                       Recipe(["Iron Tubes"], ["Screws"]),
+                       Recipe(["Steel Bar"], ["Steel Tubes"]),
+                       Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(7)  # 0.txt is just a dummy for testing
+level = load.load_level(6)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
