@@ -1,4 +1,3 @@
-import math
 import os
 import sys
 import time
@@ -16,7 +15,7 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 #####CONSTANTS#####
 FPS = 60
 TILE_SIZE = 80  # dimensions of each tile in pixels
-TICK_RATE = 1  # ticks per second
+TICK_RATE = 1.5  # ticks per second
 #####################
 
 
@@ -533,9 +532,9 @@ class Exit(Tile):
     def tick(self):
         global level
         self.dt += 1 / FPS * TICK_RATE
-        if self.dt > 10 / TICK_RATE:
+        if self.dt > 5 / TICK_RATE:
             self.items.append(Item(self.resource))
-            self.dt -= 10 / TICK_RATE
+            self.dt -= 5 / TICK_RATE
             temp_item_num = 0
             for i in self.items:
                 if i.name == level.goal:
@@ -544,7 +543,7 @@ class Exit(Tile):
                     self.items = []
                     temp_item_num = 0
                     print("REJECTED")
-            if temp_item_num >= 10:
+            if temp_item_num >= 5:
                 print("done")
                 level = level.next_level()
             self.items = []
@@ -561,7 +560,7 @@ rc = RecipeCollection((Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natu
                        Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"])))
 load = Loader()
-level = load.load_level(10)  # 0.txt is just a dummy for testing
+level = load.load_level(9)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
