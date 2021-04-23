@@ -410,6 +410,7 @@ class Manufacturer(Tile):
                 for item in outputs:
                     item.manufactured = True
                 self.items.extend(outputs)
+                self.dt -= 1 / TICK_RATE
         for i in self.items:
             if i.manufactured:
                 i.offset += TICK_RATE / FPS
@@ -564,7 +565,7 @@ rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], [
                        Recipe(["Steel Bar"], ["Steel Tubes"]),
                        Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(6)  # 0.txt is just a dummy for testing
+level = load.load_level(8)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
