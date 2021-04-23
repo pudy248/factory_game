@@ -33,10 +33,12 @@ class Level:
         self.time = 0
 
     def world_tick(self):
+        global tutorial_cleared
         for tiley in range(self.length):
             for tilex in range(self.width):
                 self.tile_array[tiley][tilex].tick()
-        self.time += sum(fps_arr) / 30
+        if tutorial_cleared:
+            self.time += sum(fps_arr) / 30
 
     def draw_level(self):
         if self.dirty:
