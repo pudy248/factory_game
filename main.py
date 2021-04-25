@@ -2,7 +2,6 @@ import math
 import os
 import sys
 import time
-import math
 
 import pygame as pg
 
@@ -31,11 +30,15 @@ class Level:
         self.goal = g
         self.surf = pg.Surface([0, 0])
         self.dirty = True
+        self.time = 0
 
     def world_tick(self):
+        global tutorial_cleared
         for tiley in range(self.length):
             for tilex in range(self.width):
                 self.tile_array[tiley][tilex].tick()
+        if tutorial_cleared:
+            self.time += sum(fps_arr) / 30
 
     def draw_level(self):
         if self.dirty:
@@ -75,7 +78,10 @@ class Level:
                                                 i.offset * i.direction[1] * TILE_SIZE)))
 
     def next_level(self):
-        global load
+        global load, score, hiScore
+        score += 100000 * (level.number ** 3) / (level.time - 15)
+        if (100000 * (level.number ** 3) / (level.time - 15)) > hiScore:
+            hiScore = 100000 * (level.number ** 3) / (level.time - 15)
         return load.load_level(self.number + 1)
 
 
@@ -178,21 +184,30 @@ class Recipe:
         return True
 
     def get_image(self):
-        temp_surf = pg.Surface((int(TILE_SIZE * 3), TILE_SIZE/2))
+        temp_surf = pg.Surface((int(TILE_SIZE * 3), TILE_SIZE / 2))
         temp_surf.fill((100, 100, 100))
-        temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE//3, TILE_SIZE//3)), ((TILE_SIZE*3)//2 + TILE_SIZE//12, TILE_SIZE//12))
+        temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE // 3, TILE_SIZE // 3)),
+                       ((TILE_SIZE * 3) // 2 + TILE_SIZE // 12, TILE_SIZE // 12))
         for i in range(len(self.outputs)):
-            pg.draw.rect(temp_surf, (125, 125, 125), ((i+4) * TILE_SIZE//2 + TILE_SIZE//24 - 1, TILE_SIZE//24 -1, 5*TILE_SIZE//12, 5*TILE_SIZE//12))
-            pg.draw.rect(temp_surf, (150, 150, 150), ((i + 4) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 +1, 5 * TILE_SIZE // 12, 5 * TILE_SIZE // 12))
-            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.outputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((i+4) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
-        for i in range(len(self.inputs)):
             pg.draw.rect(temp_surf, (125, 125, 125), (
-            (2-i) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
+            (i + 4) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
             5 * TILE_SIZE // 12))
             pg.draw.rect(temp_surf, (150, 150, 150), (
-            (2-i) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
+            (i + 4) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
             5 * TILE_SIZE // 12))
-            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.inputs[i] + ".png"), (TILE_SIZE//3, TILE_SIZE//3)), ((2-i) * TILE_SIZE//2 + TILE_SIZE//12, TILE_SIZE//12))
+            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.outputs[i] + ".png"),
+                                                    (TILE_SIZE // 3, TILE_SIZE // 3)),
+                           ((i + 4) * TILE_SIZE // 2 + TILE_SIZE // 12, TILE_SIZE // 12))
+        for i in range(len(self.inputs)):
+            pg.draw.rect(temp_surf, (125, 125, 125), (
+                (2 - i) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
+                5 * TILE_SIZE // 12))
+            pg.draw.rect(temp_surf, (150, 150, 150), (
+                (2 - i) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
+                5 * TILE_SIZE // 12))
+            temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.inputs[i] + ".png"),
+                                                    (TILE_SIZE // 3, TILE_SIZE // 3)),
+                           ((2 - i) * TILE_SIZE // 2 + TILE_SIZE // 12, TILE_SIZE // 12))
         return temp_surf
 
 
@@ -210,10 +225,10 @@ class RecipeCollection:
         return False
 
     def get_image(self):
-        temp_surf = pg.Surface((int(TILE_SIZE*3.25), (TILE_SIZE//2)*len(self.recipes) + TILE_SIZE//4))
+        temp_surf = pg.Surface((int(TILE_SIZE * 3.25), (TILE_SIZE // 2) * len(self.recipes) + TILE_SIZE // 4))
         temp_surf.fill((50, 50, 50))
         for i in range(len(self.recipes)):
-            temp_surf.blit(self.recipes[i].get_image(), (TILE_SIZE//8, i*TILE_SIZE//2 + TILE_SIZE//8))
+            temp_surf.blit(self.recipes[i].get_image(), (TILE_SIZE // 8, i * TILE_SIZE // 2 + TILE_SIZE // 8))
         return temp_surf
 
 
@@ -572,7 +587,13 @@ fps_arr = [1 / FPS] * 30
 tutorial_cleared = False
 tutorial_text = "[tutorial goes here, press enter to continue]"
 
+score = 0
+hiScore = 0
 while True:
+    if score > int(open("highscore.txt").read()):
+        hiScore = score
+    else:
+        hiScore = int(open("highscore.txt").read())
     SURF.fill((0, 0, 0))
     if tutorial_cleared:
         level.world_tick()
@@ -586,6 +607,9 @@ while True:
         SURF.blit(r, [(SURF.get_width() - r.get_width()) / 2, (SURF.get_height() - r.get_height()) / 2])
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+            if score > int(open("highscore.txt").read()):
+                hsFile = open("highscore.txt", "w")
+                hsFile.write(str(int(score)))
             pg.quit()
             sys.exit()
         elif event.type == pg.KEYDOWN:
@@ -605,6 +629,10 @@ while True:
     f = pg.font.SysFont("Arial", 15)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
     SURF.blit(r, (5, 5))
+    SURF.blit(f.render("Time: " + str(int(level.time)), True, pg.Color("white")), (200, 5))
+    SURF.blit(f.render("Score: " + str(int(score)), True, pg.Color("white")), (400, 5))
+    SURF.blit(f.render("High Score: " + str(int(hiScore)), True, pg.Color("white")), (600, 5))
+    player.move(pg.mouse.get_pos())
     if tutorial_cleared:
         player.move(pg.mouse.get_pos())
     pg.display.update()
