@@ -54,8 +54,16 @@ class Level:
                         img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
                         img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
                         self.surf.blit(img, (
-                        ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
-                        ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
+                            ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
+                            ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
+                    elif self.tile_array[tiley][tilex].resource in ["Wood", "Coal", "Iron Ore", "Oil"]:
+                        ex = self.tile_array[tiley][tilex]
+                        gl = Item(ex.resource)
+                        img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
+                        img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
+                        self.surf.blit(img, (
+                            ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
+                            ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
         SURF.blit(self.surf,
                   [(SURF.get_width() - self.surf.get_width()) / 2, (SURF.get_height() - self.surf.get_height()) / 2])
         for tiley in range(self.length):
@@ -71,9 +79,7 @@ class Level:
 
     def next_level(self):
         global load, score, hiScore
-        score += 100000 * (level.number ** 3) / (level.time - 15)
-        if (100000 * (level.number ** 3) / (level.time - 15)) > hiScore:
-            hiScore = 100000 * (level.number ** 3) / (level.time - 15)
+        score += 10 * int(10000 * (self.number ** 2.5) / (self.time - (10 / TICK_RATE)))
         return load.load_level(self.number + 1)
 
 
@@ -417,6 +423,7 @@ class Manufacturer(Tile):
                 for item in outputs:
                     item.manufactured = True
                 self.items.extend(outputs)
+                self.dt -= 1 / TICK_RATE
         for i in self.items:
             if i.manufactured:
                 i.offset += TICK_RATE / FPS
@@ -582,14 +589,21 @@ tutorial_text = "[tutorial goes here, press enter to continue]"
 score = 0
 hiScore = 0
 while True:
-    level.world_tick()
-    SURF.fill((0, 0, 0))
-    level.draw_level()
-    player.ghost_tile.draw()
     if score > int(open("highscore.txt").read()):
         hiScore = score
     else:
         hiScore = int(open("highscore.txt").read())
+    SURF.fill((0, 0, 0))
+    if tutorial_cleared:
+        level.world_tick()
+        level.draw_level()
+        player.ghost_tile.draw()
+        if rc.show_recipes:
+            SURF.blit(rc.image, (0, (SURF.get_height() - rc.image.get_height()) // 2))
+    else:
+        f = pg.font.SysFont("Arial", 30)
+        r = f.render(tutorial_text, True, pg.Color("white"))
+        SURF.blit(r, [(SURF.get_width() - r.get_width()) / 2, (SURF.get_height() - r.get_height()) / 2])
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             if score > int(open("highscore.txt").read()):
@@ -606,7 +620,7 @@ while True:
                     rc.show_recipes = not rc.show_recipes
                 else:
                     player.select(event.key)
-        elif event.type == pg.MOUSEBUTTONUP:
+        elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared:
             if event.button == pg.BUTTON_LEFT:
                 player.click(event.pos)
             elif event.button == pg.BUTTON_RIGHT:
@@ -618,6 +632,8 @@ while True:
     SURF.blit(f.render("Score: " + str(int(score)), True, pg.Color("white")), (400, 5))
     SURF.blit(f.render("High Score: " + str(int(hiScore)), True, pg.Color("white")), (600, 5))
     player.move(pg.mouse.get_pos())
+    if tutorial_cleared:
+        player.move(pg.mouse.get_pos())
     pg.display.update()
     fps_arr.append(time.perf_counter() - t)
     t = time.perf_counter()
