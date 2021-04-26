@@ -350,7 +350,7 @@ class Player:
         self.last_pos = pos
         if self.get_tile() and level.tile_array[self.get_y()][self.get_x()].type != "Exit":
             level.tile_array[self.get_y()][self.get_x()] = Tile(
-                [self.get_x(), self.get_y()], self.tile_angle,
+                [self.get_x(), self.get_y()], 0,
                 level.tile_array[self.get_y()][self.get_x()].resource)
 
     def click(self, pos):
