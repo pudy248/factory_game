@@ -1,3 +1,4 @@
+import math
 import os
 import sys
 import time
@@ -10,13 +11,15 @@ clock = pg.time.Clock()
 W = pg.display.Info().current_w
 H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
+
 #####CONSTANTS#####
 FPS = 60
+TICK_RATE = 1.5  # ticks per second
+
 if SURF.get_width()/20 > SURF.get_height()/10:
     TILE_SIZE = SURF.get_height()//10 # dimensions of each tile in pixels
 else:
     TILE_SIZE = SURF.get_width()//20
-TICK_RATE = 1.5  # ticks per second
 #####################
 
 
