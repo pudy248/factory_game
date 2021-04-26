@@ -13,10 +13,10 @@ H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 #####CONSTANTS#####
 FPS = 60
-if SURF.get_width()/20 > SURF.get_height()/10:
-    TILE_SIZE = SURF.get_height()//10 # dimensions of each tile in pixels
+if SURF.get_width() / 20 > SURF.get_height() / 10:
+    TILE_SIZE = SURF.get_height() // 10  # dimensions of each tile in pixels
 else:
-    TILE_SIZE = SURF.get_width()//20
+    TILE_SIZE = SURF.get_width() // 20
 TICK_RATE = 1  # ticks per second
 #####################
 
@@ -79,9 +79,7 @@ class Level:
 
     def next_level(self):
         global load, score, hiScore
-        score += 100000 * (level.number ** 3) / (level.time - 15)
-        if (100000 * (level.number ** 3) / (level.time - 15)) > hiScore:
-            hiScore = 100000 * (level.number ** 3) / (level.time - 15)
+        score += 10 * int(10000 * (self.number ** 2.5) / (self.time - (10 / TICK_RATE)))
         return load.load_level(self.number + 1)
 
 
@@ -284,7 +282,7 @@ class Tile:
             while i < len(self.items):
                 if not self.items[i].moved and self.items[i].offset > 1 and \
                         -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(
-                        self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                    self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                     temp = self.items.pop(i)
                     temp.moved = True
                     temp.manufactured = False
@@ -573,14 +571,15 @@ rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], [
                        Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
                        Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
                        Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
-                       Recipe(["Screws", "Springs"], ["Machine Parts"]), Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
+                       Recipe(["Screws", "Springs"], ["Machine Parts"]),
+                       Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"]),
                        Recipe(["Iron Bar"], ["Iron Tubes"]),
                        Recipe(["Iron Tubes"], ["Screws"]),
                        Recipe(["Steel Bar"], ["Steel Tubes"]),
                        Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(8)  # 0.txt is just a dummy for testing
+level = load.load_level(1)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
