@@ -11,13 +11,15 @@ clock = pg.time.Clock()
 W = pg.display.Info().current_w
 H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
+
 #####CONSTANTS#####
 FPS = 60
+TICK_RATE = 1.5  # ticks per second
+
 if SURF.get_width()/20 > SURF.get_height()/10:
     TILE_SIZE = SURF.get_height()//10 # dimensions of each tile in pixels
 else:
     TILE_SIZE = SURF.get_width()//20
-TICK_RATE = 1  # ticks per second
 #####################
 
 
@@ -551,9 +553,9 @@ class Exit(Tile):
     def tick(self):
         global level
         self.dt += 1 / FPS * TICK_RATE
-        if self.dt > 10 / TICK_RATE:
+        if self.dt > 5 / TICK_RATE:
             self.items.append(Item(self.resource))
-            self.dt -= 10 / TICK_RATE
+            self.dt -= 5 / TICK_RATE
             temp_item_num = 0
             for i in self.items:
                 if i.name == level.goal:
@@ -562,7 +564,7 @@ class Exit(Tile):
                     self.items = []
                     temp_item_num = 0
                     print("REJECTED")
-            if temp_item_num >= 10:
+            if temp_item_num >= 5:
                 print("done")
                 level = level.next_level()
             self.items = []
@@ -580,7 +582,7 @@ rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], [
                        Recipe(["Steel Bar"], ["Steel Tubes"]),
                        Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(8)  # 0.txt is just a dummy for testing
+level = load.load_level(10)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
