@@ -17,11 +17,11 @@ FPS = 60
 TICK_RATE = 1.5  # ticks per second
 
 if SURF.get_width()/20 > SURF.get_height()/10:
-    TILE_SIZE = SURF.get_height()//10 # dimensions of each tile in pixels
+    TILE_SIZE = SURF.get_height()//10  # dimensions of each tile in pixels
 else:
     TILE_SIZE = SURF.get_width()//20
 #####################
-
+bufferSize = 9
 
 class Level:
     def __init__(self, tMap, g, n):
@@ -110,6 +110,14 @@ class Loader:
                 g += " "
             g += gArr[i]
         tMap.remove(gArr)
+        for l in range(len(tMap)):
+            for i in range(bufferSize):
+                tMap[l].insert(0, "B")
+                tMap[l].append("B")
+        list = ["B"] * len(tMap[0])
+        for i in range(bufferSize):
+            tMap.insert(0, list)
+            tMap.append(list)
         lvl = self.convert(tMap, g)
         return lvl
 
@@ -118,7 +126,7 @@ class Loader:
         newMap = []
         for i in range(length):
             width = len(tMap[i])
-            newMap.append([Tile([0, 0], 0, "None")] * width)
+            newMap.append([Tile([0, 0], 0, "BG")] * width)
         for y in range(length):
             width = len(tMap[y])
             for x in range(width):
@@ -143,6 +151,8 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Coal")
                 elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
+                elif str == 'B':
+                    newMap[y][x] = Tile(pos, 0, "BG")
                 else:
                     newMap[y][x] = Tile(pos, 0, "None")
         return Level(newMap, g, self.lNum)
@@ -243,6 +253,8 @@ class Tile:
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
         elif self.resource == "Out of Bounds":
             self.image = pg.transform.scale(pg.image.load("sprites\\OOB.png"), (TILE_SIZE, TILE_SIZE))
+        elif self.resource == "BG":
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
         else:
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"),
                                             (TILE_SIZE, TILE_SIZE))
@@ -301,7 +313,7 @@ class Tile:
             self.items = [self.items[0]]
 
     def is_open(self, type):
-        if self.resource == "Out of Bounds":
+        if self.resource in ["Out of Bounds", "BG"]:
             return False
         elif self.resource in ["Wood", "Oil", "Iron Ore", "Coal"] and type != "Extractor":
             return False
@@ -582,13 +594,12 @@ rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], [
                        Recipe(["Steel Bar"], ["Steel Tubes"]),
                        Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(10)  # 0.txt is just a dummy for testing
+level = load.load_level(1)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
 tutorial_cleared = False
 tutorial_text = "[tutorial goes here, press enter to continue]"
-
 score = 0
 hiScore = 0
 while True:
