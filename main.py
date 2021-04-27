@@ -43,48 +43,55 @@ class Level:
             self.time += sum(fps_arr) / 30
 
     def draw_level(self):
-        if self.dirty:
-            self.dirty = False
-            self.surf = pg.Surface([len(self.tile_array[0]) * TILE_SIZE, self.length * TILE_SIZE])
+        if self.number == 0:
+            SURF.fill((0, 0, 0))
+            w = pg.font.SysFont("Arial", 90)
+            SURF.blit(w.render("you win", True, pg.Color("red")), (600, 600))
+        else:
+            if self.dirty:
+                self.dirty = False
+                self.surf = pg.Surface([len(self.tile_array[0]) * TILE_SIZE, self.length * TILE_SIZE])
+                for tiley in range(self.length):
+                    width = len(self.tile_array[tiley])
+                    for tilex in range(width):
+                        self.tile_array[tiley][tilex].blit(self.surf)
+                        if self.tile_array[tiley][tilex].type == "Exit":
+                            ex = self.tile_array[tiley][tilex]
+                            gl = Item(self.goal)
+                            img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
+                            img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
+                            self.surf.blit(img, (
+                                ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
+                                ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
+                        elif self.tile_array[tiley][tilex].resource in ["Wood", "Coal", "Iron Ore", "Oil"]:
+                            ex = self.tile_array[tiley][tilex]
+                            gl = Item(ex.resource)
+                            img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
+                            img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
+                            self.surf.blit(img, (
+                                ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
+                                ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
+            SURF.blit(self.surf,
+                      [(SURF.get_width() - self.surf.get_width()) / 2,
+                       (SURF.get_height() - self.surf.get_height()) / 2])
             for tiley in range(self.length):
-                width = len(self.tile_array[tiley])
-                for tilex in range(width):
-                    self.tile_array[tiley][tilex].blit(self.surf)
-                    if self.tile_array[tiley][tilex].type == "Exit":
-                        ex = self.tile_array[tiley][tilex]
-                        gl = Item(self.goal)
-                        img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
-                        img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
-                        self.surf.blit(img, (
-                            ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
-                            ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
-                    elif self.tile_array[tiley][tilex].resource in ["Wood", "Coal", "Iron Ore", "Oil"]:
-                        ex = self.tile_array[tiley][tilex]
-                        gl = Item(ex.resource)
-                        img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
-                        img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
-                        self.surf.blit(img, (
-                            ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
-                            ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
-        SURF.blit(self.surf,
-                  [(SURF.get_width() - self.surf.get_width()) / 2, (SURF.get_height() - self.surf.get_height()) / 2])
-        for tiley in range(self.length):
-            for tilex in range(self.width):
-                if self.tile_array[tiley][tilex].type == "Belt" or len(
-                        self.tile_array[tiley][tilex].items) > 0:  # change back to and
-                    for i in self.tile_array[tiley][tilex].items:
-                        img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
-                        SURF.blit(img, (self.tile_array[tiley][tilex].get_x() + TILE_SIZE / 4 +
-                                        (i.offset * i.direction[0] * TILE_SIZE),
-                                        self.tile_array[tiley][tilex].get_y() + TILE_SIZE / 4 - (
-                                                i.offset * i.direction[1] * TILE_SIZE)))
+                for tilex in range(self.width):
+                    if self.tile_array[tiley][tilex].type == "Belt" or len(
+                            self.tile_array[tiley][tilex].items) > 0:  # change back to and
+                        for i in self.tile_array[tiley][tilex].items:
+                            img = pg.transform.scale(i.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
+                            SURF.blit(img, (self.tile_array[tiley][tilex].get_x() + TILE_SIZE / 4 +
+                                            (i.offset * i.direction[0] * TILE_SIZE),
+                                            self.tile_array[tiley][tilex].get_y() + TILE_SIZE / 4 - (
+                                                    i.offset * i.direction[1] * TILE_SIZE)))
 
     def next_level(self):
         global load, score, hiScore
-        score += 100000 * (level.number ** 3) / (level.time - 15)
-        if (100000 * (level.number ** 3) / (level.time - 15)) > hiScore:
-            hiScore = 100000 * (level.number ** 3) / (level.time - 15)
-        return load.load_level(self.number + 1)
+        score += 10 * int(10000 * (self.number ** 2.75) / (self.time - (10 / TICK_RATE)))
+        if self.number != 10:
+            return load.load_level(self.number + 1)
+        else:
+            return load.load_level(0)
 
 
 class Loader:
@@ -298,7 +305,7 @@ class Tile:
             while i < len(self.items):
                 if not self.items[i].moved and self.items[i].offset > 1 and \
                         -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(
-                        self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                    self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                     temp = self.items.pop(i)
                     temp.moved = True
                     temp.manufactured = False
@@ -587,14 +594,15 @@ rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], [
                        Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
                        Recipe(["Wood", "Iron Ore"], ["Iron Bar"]), Recipe(["Natural Gas", "Iron Ore"], ["Iron Bar"]),
                        Recipe(["Coal", "Iron Bar"], ["Steel Bar"]), Recipe(["Steel Bar", "Iron Bar"], ["Alloy Plate"]),
-                       Recipe(["Screws", "Springs"], ["Machine Parts"]), Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
+                       Recipe(["Screws", "Springs"], ["Machine Parts"]),
+                       Recipe(["Steel Tubes", "Plastic"], ["Consumer Goods"]),
                        Recipe(["Oil"], ["Natural Gas", "Petroleum"]), Recipe(["Petroleum"], ["Plastic", "Gasoline"]),
                        Recipe(["Iron Bar"], ["Iron Tubes"]),
                        Recipe(["Iron Tubes"], ["Screws"]),
                        Recipe(["Steel Bar"], ["Steel Tubes"]),
                        Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(1)  # 0.txt is just a dummy for testing
+level = load.load_level(10)  # 0.txt is just a dummy for testing
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
