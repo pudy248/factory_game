@@ -11,15 +11,17 @@ clock = pg.time.Clock()
 W = pg.display.Info().current_w
 H = pg.display.Info().current_h
 SURF = pg.display.set_mode((W, H), pg.NOFRAME)
+
 #####CONSTANTS#####
 FPS = 60
+TICK_RATE = 1.5  # ticks per second
+
 if SURF.get_width() / 20 > SURF.get_height() / 10:
     TILE_SIZE = SURF.get_height() // 10  # dimensions of each tile in pixels
 else:
     TILE_SIZE = SURF.get_width() // 20
-TICK_RATE = 1  # ticks per second
 #####################
-
+bufferSize = 9
 
 class Level:
     def __init__(self, tMap, g, n):
@@ -43,8 +45,14 @@ class Level:
     def draw_level(self):
         if self.number == 0:
             SURF.fill((0, 0, 0))
+            rc.show_recipes = False
             w = pg.font.SysFont("Arial", 90)
-            SURF.blit(w.render("you win", True, pg.Color("white")), (600, 600))
+            yw = w.render("You win!", True, pg.Color("white"))
+            fs = w.render("Final Score: " + str(score), True, pg.Color("white"))
+            hs = w.render("High Score: " + str(hiScore), True, pg.Color("white"))
+            SURF.blit(yw, [(SURF.get_width() - yw.get_width()) / 2, (SURF.get_height() - yw.get_height() - 200) / 2])
+            SURF.blit(fs, [(SURF.get_width() - fs.get_width()) / 2, (SURF.get_height() - fs.get_height()) / 2])
+            SURF.blit(hs, [(SURF.get_width() - hs.get_width()) / 2, (SURF.get_height() - hs.get_height() + 200) / 2])
         else:
             if self.dirty:
                 self.dirty = False
@@ -115,6 +123,14 @@ class Loader:
                 g += " "
             g += gArr[i]
         tMap.remove(gArr)
+        for l in range(len(tMap)):
+            for i in range(bufferSize):
+                tMap[l].insert(0, "B")
+                tMap[l].append("B")
+        list = ["B"] * len(tMap[0])
+        for i in range(bufferSize):
+            tMap.insert(0, list)
+            tMap.append(list)
         lvl = self.convert(tMap, g)
         return lvl
 
@@ -123,7 +139,7 @@ class Loader:
         newMap = []
         for i in range(length):
             width = len(tMap[i])
-            newMap.append([Tile([0, 0], 0, "None")] * width)
+            newMap.append([Tile([0, 0], 0, "BG")] * width)
         for y in range(length):
             width = len(tMap[y])
             for x in range(width):
@@ -148,6 +164,8 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Coal")
                 elif str == 'O':
                     newMap[y][x] = Tile(pos, 0, "Oil")
+                elif str == 'B':
+                    newMap[y][x] = Tile(pos, 0, "BG")
                 else:
                     newMap[y][x] = Tile(pos, 0, "None")
         return Level(newMap, g, self.lNum)
@@ -248,6 +266,8 @@ class Tile:
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
         elif self.resource == "Out of Bounds":
             self.image = pg.transform.scale(pg.image.load("sprites\\OOB.png"), (TILE_SIZE, TILE_SIZE))
+        elif self.resource == "BG":
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
         else:
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"),
                                             (TILE_SIZE, TILE_SIZE))
@@ -306,7 +326,7 @@ class Tile:
             self.items = [self.items[0]]
 
     def is_open(self, type):
-        if self.resource == "Out of Bounds":
+        if self.resource in ["Out of Bounds", "BG"]:
             return False
         elif self.resource in ["Wood", "Oil", "Iron Ore", "Coal"] and type != "Extractor":
             return False
@@ -355,7 +375,7 @@ class Player:
         self.last_pos = pos
         if self.get_tile() and level.tile_array[self.get_y()][self.get_x()].type != "Exit":
             level.tile_array[self.get_y()][self.get_x()] = Tile(
-                [self.get_x(), self.get_y()], self.tile_angle,
+                [self.get_x(), self.get_y()], 0,
                 level.tile_array[self.get_y()][self.get_x()].resource)
 
     def click(self, pos):
@@ -558,9 +578,9 @@ class Exit(Tile):
     def tick(self):
         global level
         self.dt += 1 / FPS * TICK_RATE
-        if self.dt > 10 / TICK_RATE:
+        if self.dt > 5 / TICK_RATE:
             self.items.append(Item(self.resource))
-            self.dt -= 10 / TICK_RATE
+            self.dt -= 5 / TICK_RATE
             temp_item_num = 0
             for i in self.items:
                 if i.name == level.goal:
@@ -569,7 +589,7 @@ class Exit(Tile):
                     self.items = []
                     temp_item_num = 0
                     print("REJECTED")
-            if temp_item_num >= 10:
+            if temp_item_num >= 5:
                 print("done")
                 level = level.next_level()
             self.items = []
@@ -588,13 +608,12 @@ rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], [
                        Recipe(["Steel Bar"], ["Steel Tubes"]),
                        Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(10)  # 0.txt is just a dummy for testing
+level = load.load_level(0)
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
 tutorial_cleared = False
-tutorial_text = "[tutorial goes here, press enter to continue]"
-
+tutorial_text = "[tutorial goes here. press a number to go to that level, 0 for level 10 and enter for level 1]"
 score = 0
 hiScore = 0
 while True:
@@ -621,8 +640,16 @@ while True:
             pg.quit()
             sys.exit()
         elif event.type == pg.KEYDOWN:
+            numKeys = [pg.K_RETURN, pg.K_1, pg.K_2, pg.K_3, pg.K_4, pg.K_5, pg.K_6, pg.K_7, pg.K_8, pg.K_9, pg.K_0]
             if not tutorial_cleared:
-                if event.key == pg.K_RETURN:
+                if event.key in numKeys:
+                    lvlNum = numKeys.index(event.key)
+                    if lvlNum == 0:
+                        level = load.load_level(1)
+                    else:
+                        print(lvlNum)
+                        level = load.load_level(lvlNum)
+                        print(level.number)
                     tutorial_cleared = True
             else:
                 if event.key == pg.K_TAB:
@@ -637,9 +664,10 @@ while True:
     f = pg.font.SysFont("Arial", 15)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
     SURF.blit(r, (5, 5))
-    SURF.blit(f.render("Time: " + str(int(level.time)), True, pg.Color("white")), (200, 5))
-    SURF.blit(f.render("Score: " + str(int(score)), True, pg.Color("white")), (400, 5))
-    SURF.blit(f.render("High Score: " + str(int(hiScore)), True, pg.Color("white")), (600, 5))
+    if level.number != 0:
+        SURF.blit(f.render("Time: " + str(int(level.time)), True, pg.Color("white")), (200, 5))
+        SURF.blit(f.render("Score: " + str(int(score)), True, pg.Color("white")), (400, 5))
+        SURF.blit(f.render("High Score: " + str(int(hiScore)), True, pg.Color("white")), (600, 5))
     player.move(pg.mouse.get_pos())
     if tutorial_cleared:
         player.move(pg.mouse.get_pos())
