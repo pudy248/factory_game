@@ -662,12 +662,23 @@ while True:
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
     f = pg.font.SysFont("Arial", 15)
+    s = pg.font.SysFont("Arial Bold", 50)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
     SURF.blit(r, (5, 5))
     if level.number != 0:
-        SURF.blit(f.render("Time: " + str(int(level.time)), True, pg.Color("white")), (200, 5))
-        SURF.blit(f.render("Score: " + str(int(score)), True, pg.Color("white")), (400, 5))
-        SURF.blit(f.render("High Score: " + str(int(hiScore)), True, pg.Color("white")), (600, 5))
+        tm = s.render("Time: " + str(int(level.time)) + "   ", True, pg.Color("black"))
+        sc = s.render("   Score: " + str(int(score)) + "   ", True, pg.Color("black"))
+        hs = s.render("   High Score: " + str(int(hiScore)), True, pg.Color("black"))
+        ww = tm.get_width() + sc.get_width() + hs.get_width() + 100
+        scoreSurf = pg.Surface((ww, tm.get_height() + 10))
+        scoreSurf.fill((69, 182, 49))
+        scoreSurf.blit(tm, ((scoreSurf.get_width() - (tm.get_width() + sc.get_width() + hs.get_width())) / 2, 5))
+        scoreSurf.blit(sc, (
+        (scoreSurf.get_width() - (tm.get_width() + sc.get_width() + hs.get_width())) / 2 + tm.get_width(), 5))
+        scoreSurf.blit(hs, ((scoreSurf.get_width() - (
+                    tm.get_width() + sc.get_width() + hs.get_width())) / 2 + tm.get_width() + sc.get_width(), 5))
+        scoreSurf.set_alpha(200)
+        SURF.blit(scoreSurf, ((W - ww) / 2, (TILE_SIZE - tm.get_height()) / 2))
     player.move(pg.mouse.get_pos())
     if tutorial_cleared:
         player.move(pg.mouse.get_pos())
