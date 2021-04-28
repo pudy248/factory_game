@@ -167,13 +167,13 @@ class Loader:
 class Item:
     def __init__(self, name):
         self.name = name
-        self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 4))+ ".png")
+        self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 3))+ ".png")
         self.direction = pg.Vector2([0, 1])
         self.moved = True
         if os.path.exists("sprites\\" + name + ".png"):
             self.image = pg.image.load("sprites\\" + name + ".png")
         else:
-            self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 4))+ ".png")
+            self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 3))+ ".png")
         self.direction = pg.Vector2([0, 1])
         self.moved = True
         self.manufactured = False
@@ -254,14 +254,14 @@ class Tile:
         self.direction = pg.Vector2([1, 0]).rotate(angle)
         self.resource = resource  # None, Iron, Wood, Coal, Oil, Out of Bounds
         if self.resource == "None":
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 4)) if not ghost else "1") + ".png"), (TILE_SIZE, TILE_SIZE))
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"), (TILE_SIZE, TILE_SIZE))
         elif self.resource == "Out of Bounds":
             self.image = pg.transform.scale(pg.image.load("sprites\\OOB.png"), (TILE_SIZE, TILE_SIZE))
         elif self.resource == "BG":
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
         else:
             self.image = pg.transform.scale(
-                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 4)) if not ghost else "1") + ".png"),
+                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
                 (TILE_SIZE, TILE_SIZE))
             self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"),
                                             (TILE_SIZE, TILE_SIZE)), (0, 0))
@@ -408,7 +408,7 @@ class Extractor(Tile):
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
         else:
             self.image = pg.transform.scale(
-                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 4)) if not ghost else "1") + ".png"),
+                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
                 (TILE_SIZE, TILE_SIZE))
             self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + " Extractor.png"),
                                                (TILE_SIZE, TILE_SIZE)), (0, 0))
@@ -557,7 +557,7 @@ class Void(Tile):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Void"
-        self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 4))+ ".png"), (TILE_SIZE, TILE_SIZE))
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 3))+ ".png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
@@ -568,7 +568,7 @@ class Void(Tile):
 class Exit(Tile):
     def __init__(self, pos, angle, resource):
         super().__init__(pos, angle, resource)
-        self.image = pg.transform.scale(pg.image.load("sprites\\Alloy Plate.png"), (TILE_SIZE, TILE_SIZE))
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_exit.png"), (TILE_SIZE, TILE_SIZE))
         self.type = "Exit"
         self.dt = 0
 
