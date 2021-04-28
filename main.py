@@ -407,8 +407,11 @@ class Extractor(Tile):
         if self.resource in ["None", "Out of Bounds"]:
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
         else:
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"),
-                                            (TILE_SIZE, TILE_SIZE))
+            self.image = pg.transform.scale(
+                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 4)) if not ghost else "1") + ".png"),
+                (TILE_SIZE, TILE_SIZE))
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + " Extractor.png"),
+                                               (TILE_SIZE, TILE_SIZE)), (0, 0))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
         self.dt = 0
