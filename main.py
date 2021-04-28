@@ -70,14 +70,6 @@ class Level:
                             self.surf.blit(img, (
                                 ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
                                 ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
-                        elif self.tile_array[tiley][tilex].resource in ["Wood", "Coal", "Iron Ore", "Oil"]:
-                            ex = self.tile_array[tiley][tilex]
-                            gl = Item(ex.resource)
-                            img = pg.transform.scale(gl.image, (int(TILE_SIZE / 2), int(TILE_SIZE / 2)))
-                            img.fill((255, 255, 255, 185), None, pg.BLEND_RGBA_MULT)
-                            self.surf.blit(img, (
-                                ex.pos[0] * TILE_SIZE + TILE_SIZE / 2 + (gl.offset * gl.direction[0] * TILE_SIZE),
-                                ex.pos[1] * TILE_SIZE + TILE_SIZE / 2 - (gl.offset * gl.direction[1] * TILE_SIZE)))
             SURF.blit(self.surf,
                       [(SURF.get_width() - self.surf.get_width()) / 2,
                        (SURF.get_height() - self.surf.get_height()) / 2])
@@ -268,8 +260,11 @@ class Tile:
         elif self.resource == "BG":
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
         else:
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"),
-                                            (TILE_SIZE, TILE_SIZE))
+            self.image = pg.transform.scale(
+                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 4)) if not ghost else "1") + ".png"),
+                (TILE_SIZE, TILE_SIZE))
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_" + self.resource + ".png"),
+                                            (TILE_SIZE, TILE_SIZE)), (0, 0))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
         self.image_rot = []
