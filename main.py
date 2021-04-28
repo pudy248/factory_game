@@ -2,6 +2,7 @@ import math
 import os
 import sys
 import time
+import random
 
 import pygame as pg
 
@@ -174,13 +175,13 @@ class Loader:
 class Item:
     def __init__(self, name):
         self.name = name
-        self.image = pg.image.load("sprites\\tile_grass.png")
+        self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 4))+ ".png")
         self.direction = pg.Vector2([0, 1])
         self.moved = True
         if os.path.exists("sprites\\" + name + ".png"):
             self.image = pg.image.load("sprites\\" + name + ".png")
         else:
-            self.image = pg.image.load("sprites\\tile_grass.png")
+            self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 4))+ ".png")
         self.direction = pg.Vector2([0, 1])
         self.moved = True
         self.manufactured = False
@@ -214,12 +215,10 @@ class Recipe:
         temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\arrow.png"), (TILE_SIZE // 3, TILE_SIZE // 3)),
                        ((TILE_SIZE * 3) // 2 + TILE_SIZE // 12, TILE_SIZE // 12))
         for i in range(len(self.outputs)):
-            pg.draw.rect(temp_surf, (125, 125, 125), (
-            (i + 4) * TILE_SIZE // 2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12,
-            5 * TILE_SIZE // 12))
-            pg.draw.rect(temp_surf, (150, 150, 150), (
-            (i + 4) * TILE_SIZE // 2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12,
-            5 * TILE_SIZE // 12))
+            pg.draw.rect(temp_surf, (125, 125, 125), ((i + 4) * TILE_SIZE //
+                2 + TILE_SIZE // 24 - 1, TILE_SIZE // 24 - 1, 5 * TILE_SIZE // 12, 5 * TILE_SIZE // 12))
+            pg.draw.rect(temp_surf, (150, 150, 150), ((i + 4) * TILE_SIZE //
+                2 + TILE_SIZE // 24 + 1, TILE_SIZE // 24 + 1, 5 * TILE_SIZE // 12, 5 * TILE_SIZE // 12))
             temp_surf.blit(pg.transform.smoothscale(pg.image.load("sprites\\" + self.outputs[i] + ".png"),
                                                     (TILE_SIZE // 3, TILE_SIZE // 3)),
                            ((i + 4) * TILE_SIZE // 2 + TILE_SIZE // 12, TILE_SIZE // 12))
@@ -263,7 +262,7 @@ class Tile:
         self.direction = pg.Vector2([1, 0]).rotate(angle)
         self.resource = resource  # None, Iron, Wood, Coal, Oil, Out of Bounds
         if self.resource == "None":
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 4)) if not ghost else "1") + ".png"), (TILE_SIZE, TILE_SIZE))
         elif self.resource == "Out of Bounds":
             self.image = pg.transform.scale(pg.image.load("sprites\\OOB.png"), (TILE_SIZE, TILE_SIZE))
         elif self.resource == "BG":
@@ -281,10 +280,10 @@ class Tile:
         return str(self.type) + ": " + str(self.pos)
 
     def get_x(self):
-        return (math.floor(SURF.get_width() / 2 + (self.pos[0] - len(level.tile_array[0]) / 2) * TILE_SIZE))
+        return math.floor(SURF.get_width() / 2 + (self.pos[0] - len(level.tile_array[0]) / 2) * TILE_SIZE)
 
     def get_y(self):
-        return (math.floor(SURF.get_height() / 2 + (self.pos[1] - len(level.tile_array) / 2) * TILE_SIZE))
+        return math.floor(SURF.get_height() / 2 + (self.pos[1] - len(level.tile_array) / 2) * TILE_SIZE)
 
     def blit(self, surf):
         if len(self.image_rot) == 0:
@@ -358,10 +357,10 @@ class Player:
         return False
 
     def get_x(self):
-        return (math.floor((self.last_pos[0] - SURF.get_width() / 2) / TILE_SIZE + len(level.tile_array[0]) / 2))
+        return math.floor((self.last_pos[0] - SURF.get_width() / 2) / TILE_SIZE + len(level.tile_array[0]) / 2)
 
     def get_y(self):
-        return (math.floor((self.last_pos[1] - SURF.get_height() / 2) / TILE_SIZE + len(level.tile_array) / 2))
+        return math.floor((self.last_pos[1] - SURF.get_height() / 2) / TILE_SIZE + len(level.tile_array) / 2)
 
     def place(self):  # works
         level.dirty = True
@@ -560,7 +559,7 @@ class Void(Tile):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Void"
-        self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass.png"), (TILE_SIZE, TILE_SIZE))
+        self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 4))+ ".png"), (TILE_SIZE, TILE_SIZE))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
@@ -608,7 +607,7 @@ rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], [
                        Recipe(["Steel Bar"], ["Steel Tubes"]),
                        Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(0)
+level = load.load_level(9)
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
