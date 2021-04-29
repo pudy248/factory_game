@@ -674,7 +674,7 @@ player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
 tutorial_cleared = False
-tutorial_text = "[tutorial goes here. press a number to go to that level, 0 for level 10 and enter for level 1]"
+tutorial_text = "The Overlord requires a tribute of industrial parts and machinery. To construct this machinery, you must extract resources and combine them into more developed goods, using extractors and manufacturers respectively. You can select these, as well as other important tiles, using the number pad. Left click to drop tiles,right click to delete them, and push r to rotate. Extractors act as belts, you cannot build on rocks, and The Overlord requires a constant influx of the target item to be satisfied. You can see the target item on the corner of The Overlord, and the recipes to manufacture items can be toggled with the tab key. The Overlord will give you a score based on the speed of your completion following each of the 10 levels. At any time, you may surrender to The Overlord with the escape key. Push any key to go to that level, or enter to start from the beginning."
 score = 0
 hiScore = 0
 while True:
