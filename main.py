@@ -600,6 +600,45 @@ class Exit(Tile):
             self.items = []
 
 
+def drawText(surface, text, color, rect, font, aa=False, bkg=None):
+    rect = pg.Rect(rect)
+    y = rect.top
+    lineSpacing = -2
+
+    # get the height of the font
+    fontHeight = font.size("Tg")[1]
+
+    while text:
+        i = 1
+
+        # determine if the row of text will be outside our area
+        if y + fontHeight > rect.bottom:
+            break
+
+        # determine maximum width of line
+        while font.size(text[:i])[0] < rect.width and i < len(text):
+            i += 1
+
+        # if we've wrapped the text, then adjust the wrap to the last word
+        if i < len(text):
+            i = text.rfind(" ", 0, i) + 1
+
+        # render the line and blit it to the surface
+        if bkg:
+            image = font.render(text[:i], 1, color, bkg)
+            image.set_colorkey(bkg)
+        else:
+            image = font.render(text[:i], aa, color)
+
+        surface.blit(image, (rect.left, y))
+        y += fontHeight + lineSpacing
+
+        # remove the text we just blitted
+        text = text[i:]
+
+    return text
+
+
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
                        Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
@@ -635,8 +674,7 @@ while True:
             SURF.blit(rc.image, (0, (SURF.get_height() - rc.image.get_height()) // 2))
     else:
         f = pg.font.SysFont("Arial", 30)
-        r = f.render(tutorial_text, True, pg.Color("white"))
-        SURF.blit(r, [(SURF.get_width() - r.get_width()) / 2, (SURF.get_height() - r.get_height()) / 2])
+        drawText(SURF, tutorial_text, pg.Color("white"), (TILE_SIZE, TILE_SIZE, SURF.get_width()-2*TILE_SIZE, SURF.get_height()-2*TILE_SIZE), f, True)
     for event in pg.event.get():
         if event.type == pg.QUIT or event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             if score > int(open("highscore.txt").read()):
