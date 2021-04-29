@@ -348,7 +348,7 @@ class Tile:
 
 class Player:
     def __init__(self):
-        self.selected_tile = "Tile"
+        self.selected_tile = "Extractor"
         self.tile_angle = 0
         self.last_pos = [0, 0]
         self.ghost_tile = Tile(self.last_pos, 0, "None")
