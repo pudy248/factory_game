@@ -87,7 +87,6 @@ class Level:
                                                     i.offset * i.direction[1] * TILE_SIZE)))
         global transition_cd
         if transition_cd > 0:
-            print("hey there")
             f = pg.font.SysFont("Comic Sans MS", 60, True)
             r = f.render("YOUR OFFERING HAS BEEN ACCEPTED", True, pg.Color(255, 32, 32))
             SURF.blit(r, [(SURF.get_width() - r.get_width()) / 2, (SURF.get_height() - r.get_height()) / 2])
