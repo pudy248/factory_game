@@ -1,5 +1,6 @@
 import math
 import os
+import random
 import sys
 import time
 import random
@@ -35,6 +36,7 @@ class Level:
         self.surf = pg.Surface([0, 0])
         self.dirty = True
         self.time = 0
+        self.transition_cd = 0
 
     def world_tick(self):
         global tutorial_cleared
@@ -176,13 +178,13 @@ class Loader:
 class Item:
     def __init__(self, name):
         self.name = name
-        self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 3))+ ".png")
+        self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 3)) + ".png")
         self.direction = pg.Vector2([0, 1])
         self.moved = True
         if os.path.exists("sprites\\" + name + ".png"):
             self.image = pg.image.load("sprites\\" + name + ".png")
         else:
-            self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 3))+ ".png")
+            self.image = pg.image.load("sprites\\tile_grass_" + str(random.randint(1, 3)) + ".png")
         self.direction = pg.Vector2([0, 1])
         self.moved = True
         self.manufactured = False
@@ -263,11 +265,13 @@ class Tile:
         self.direction = pg.Vector2([1, 0]).rotate(angle)
         self.resource = resource  # None, Iron, Wood, Coal, Oil, Out of Bounds
         if self.resource == "None":
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"), (TILE_SIZE, TILE_SIZE))
+            self.image = pg.transform.scale(
+                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
+                (TILE_SIZE, TILE_SIZE))
         elif self.resource == "Out of Bounds":
             self.image = pg.transform.scale(pg.image.load("sprites\\OOB.png"), (TILE_SIZE, TILE_SIZE))
         elif self.resource == "BG":
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_Ocean.png"), (TILE_SIZE, TILE_SIZE))
         else:
             self.image = pg.transform.scale(
                 pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
@@ -718,13 +722,23 @@ while True:
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
     f = pg.font.SysFont("Arial", 15)
+    s = pg.font.SysFont("Arial Bold", 50)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
     SURF.blit(r, (5, 5))
-    if level.number != 0:
-        SURF.blit(f.render("Time: " + str(int(level.time)), True, pg.Color("white")), (200, 5))
-        SURF.blit(f.render("Score: " + str(int(score)), True, pg.Color("white")), (400, 5))
-        SURF.blit(f.render("High Score: " + str(int(hiScore)), True, pg.Color("white")), (600, 5))
-    player.move(pg.mouse.get_pos())
+    if level.number != 0 and tutorial_cleared:
+        tm = s.render("Time: " + str(int(level.time)) + "   ", True, pg.Color("white"))
+        sc = s.render("   Score: " + str(int(score)) + "   ", True, pg.Color("white"))
+        hs = s.render("   High Score: " + str(int(hiScore)), True, pg.Color("white"))
+        ww = tm.get_width() + sc.get_width() + hs.get_width() + 20
+        scoreSurf = pg.Surface((ww, tm.get_height() + 10))
+        scoreSurf.fill((0, 67, 156))
+        scoreSurf.blit(tm, ((scoreSurf.get_width() - (tm.get_width() + sc.get_width() + hs.get_width())) / 2, 5))
+        scoreSurf.blit(sc, (
+        (scoreSurf.get_width() - (tm.get_width() + sc.get_width() + hs.get_width())) / 2 + tm.get_width(), 5))
+        scoreSurf.blit(hs, ((scoreSurf.get_width() - (
+                    tm.get_width() + sc.get_width() + hs.get_width())) / 2 + tm.get_width() + sc.get_width(), 5))
+        scoreSurf.set_alpha(150)
+        SURF.blit(scoreSurf, ((W - ww) / 2, (TILE_SIZE - tm.get_height()) / 2))
     if tutorial_cleared:
         player.move(pg.mouse.get_pos())
     pg.display.update()
