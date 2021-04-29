@@ -23,6 +23,7 @@ else:
     TILE_SIZE = SURF.get_width() // 20
 #####################
 bufferSize = 9
+transition_cd = 0
 
 class Level:
     def __init__(self, tMap, g, n):
@@ -34,7 +35,6 @@ class Level:
         self.surf = pg.Surface([0, 0])
         self.dirty = True
         self.time = 0
-        self.transition_cd = 0
 
     def world_tick(self):
         global tutorial_cleared
@@ -45,6 +45,7 @@ class Level:
             self.time += sum(fps_arr) / 30
 
     def draw_level(self):
+        global transition_cd
         if self.number == 0:
             SURF.fill((0, 0, 0))
             rc.show_recipes = False
@@ -84,16 +85,16 @@ class Level:
                                             (i.offset * i.direction[0] * TILE_SIZE),
                                             self.tile_array[tiley][tilex].get_y() + TILE_SIZE / 4 - (
                                                     i.offset * i.direction[1] * TILE_SIZE)))
-            if self.transition_cd > 0:
-                f = pg.font.SysFont("Arial", 60)
-                r = f.render("YOUR OFFERING HAS BEEN ACCEPTED", True, pg.Color("red"))
-                SURF.blit(r, [(SURF.get_width() - r.get_width()) / 2, (SURF.get_height() - r.get_height()) / 2])
-                self.transition_cd -= 1 / (sum(fps_arr) / 30)
-
+        global transition_cd
+        if transition_cd > 0:
+            f = pg.font.SysFont("Comic Sans MS", 60, True)
+            r = f.render("YOUR OFFERING HAS BEEN ACCEPTED", True, pg.Color(255, 32, 32))
+            SURF.blit(r, [(SURF.get_width() - r.get_width()) / 2, (SURF.get_height() - r.get_height()) / 2])
+            transition_cd -= sum(fps_arr) / 30
 
     def next_level(self):
-        global load, score, hiScore
-        self.transition_cd = 3
+        global load, score, hiScore, transition_cd
+        transition_cd = 3
         score += 10 * int(10000 * (self.number ** 2.75) / (self.time - (10 / TICK_RATE)))
         if self.number != 10:
             return load.load_level(self.number + 1)
@@ -437,7 +438,10 @@ class Manufacturer(Tile):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Manufacturer"
-        self.image = pg.transform.scale(pg.image.load("sprites\\tile_factory.png"), (TILE_SIZE, TILE_SIZE))
+        self.image = pg.transform.scale(
+            pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
+            (TILE_SIZE, TILE_SIZE))
+        self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_factory.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
         self.dt = 0
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
@@ -487,7 +491,10 @@ class Belt(Tile):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Belt"
-        self.image = pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE))
+        self.image = pg.transform.scale(
+            pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
+            (TILE_SIZE, TILE_SIZE))
+        self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
@@ -496,7 +503,10 @@ class Intersection(Belt):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Intersection"
-        self.image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE))
+        self.image = pg.transform.scale(
+            pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
+            (TILE_SIZE, TILE_SIZE))
+        self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
@@ -529,7 +539,10 @@ class Splitter(Belt):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
-        self.image = pg.transform.scale(pg.image.load("sprites\\Splitter.png"), (TILE_SIZE, TILE_SIZE))
+        self.image = pg.transform.scale(
+            pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
+            (TILE_SIZE, TILE_SIZE))
+        self.image.blit(pg.transform.scale(pg.image.load("sprites\\Splitter.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
         if ghost:
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
