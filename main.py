@@ -328,7 +328,7 @@ class Tile:
                     self.items.pop(i)
                 else:
                     i += 1
-        if len(self.items) > 10:
+        if len(self.items) > 20:
             self.items = [self.items[0]]
 
     def is_open(self, type):
@@ -488,7 +488,7 @@ class Manufacturer(Tile):
                 self.items.pop(i)
             else:
                 i += 1
-        if len(self.items) > 10:
+        if len(self.items) > 20:
             self.items = [self.items[0]]
 
 
@@ -539,7 +539,7 @@ class Intersection(Belt):
                 self.items.pop(i)
             else:
                 i += 1
-        if len(self.items) > 10:
+        if len(self.items) > 20:
             self.items = [self.items[0]]
 
 
@@ -581,7 +581,7 @@ class Splitter(Belt):
                 self.items.pop(i)
             else:
                 i += 1
-        if len(self.items) > 10:
+        if len(self.items) > 20:
             self.items = [self.items[0]]
 
 
