@@ -136,19 +136,21 @@ class Loader:
         list.insert(0, "nw")
         list.append("ne")
         list.insert(0, ["B"]*bufferSize)
-        list.append(["B"] * bufferSize)
+        list.extend(["B"] * bufferSize)
         tMap.insert(0, list)
         list = ["s"] * (len(tMap[0]) - 2 * bufferSize - 2)
         list.insert(0, "sw")
         list.append("se")
         list.insert(0, ["B"] * bufferSize)
-        list.append(["B"] * bufferSize)
+        list.extend(["B"] * bufferSize)
         tMap.append(list)
-        list = ["B"] * len(tMap[0])
+        list = ["B"] * len(tMap)
         for i in range(bufferSize):
             tMap.insert(0, list)
             tMap.append(list)
         lvl = self.convert(tMap, g)
+        for i in tMap:
+            print(i)
         return lvl
 
     def convert(self, tMap, g):
@@ -712,7 +714,7 @@ rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], [
                        Recipe(["Steel Bar"], ["Steel Tubes"]),
                        Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(9)
+level = load.load_level(1)
 player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
