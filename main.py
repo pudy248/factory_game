@@ -50,13 +50,13 @@ class Level:
         if self.number == 0:
             SURF.fill((0, 0, 0))
             rc.show_recipes = False
-            w = pg.font.SysFont("Arial", 90)
-            yw = w.render("You win!", True, pg.Color("white"))
-            fs = w.render("Final Score: " + str(score), True, pg.Color("white"))
-            hs = w.render("High Score: " + str(hiScore), True, pg.Color("white"))
-            SURF.blit(yw, [(SURF.get_width() - yw.get_width()) / 2, (SURF.get_height() - yw.get_height() - 200) / 2])
+            f = pg.font.SysFont("Comic Sans MS", 60, True)
+            yw = f.render("The Overlord is satisfied. You live to see another day.", True, pg.Color("red"))
+            fs = f.render("Final Score: " + str(score), True, pg.Color("red"))
+            hs = f.render("High Score: " + str(hiScore), True, pg.Color("red"))
+            SURF.blit(yw, [(SURF.get_width() - yw.get_width()) / 2, (SURF.get_height() - yw.get_height() - 150) / 2])
             SURF.blit(fs, [(SURF.get_width() - fs.get_width()) / 2, (SURF.get_height() - fs.get_height()) / 2])
-            SURF.blit(hs, [(SURF.get_width() - hs.get_width()) / 2, (SURF.get_height() - hs.get_height() + 200) / 2])
+            SURF.blit(hs, [(SURF.get_width() - hs.get_width()) / 2, (SURF.get_height() - hs.get_height() + 150) / 2])
         else:
             if self.dirty:
                 self.dirty = False
@@ -87,7 +87,7 @@ class Level:
                                             self.tile_array[tiley][tilex].get_y() + TILE_SIZE / 4 - (
                                                     i.offset * i.direction[1] * TILE_SIZE)))
         global transition_cd
-        if transition_cd > 0:
+        if transition_cd > 0 and self.number != 10 and self.number != 0:
             f = pg.font.SysFont("Comic Sans MS", 60, True)
             r = f.render("YOUR OFFERING HAS BEEN ACCEPTED", True, pg.Color(255, 32, 32))
             SURF.blit(r, [(SURF.get_width() - r.get_width()) / 2, (SURF.get_height() - r.get_height()) / 2])
