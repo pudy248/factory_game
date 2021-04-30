@@ -724,6 +724,8 @@ while True:
             else:
                 if event.key == pg.K_TAB:
                     rc.show_recipes = not rc.show_recipes
+                elif event.key == pg.K_BACKSPACE:
+                    level = load.load_level(level.number)
                 else:
                     player.select(event.key)
         elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared:
