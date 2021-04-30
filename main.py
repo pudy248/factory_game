@@ -127,9 +127,23 @@ class Loader:
             g += gArr[i]
         tMap.remove(gArr)
         for l in range(len(tMap)):
+            tMap[l].insert(0, "w")
+            tMap[l].insert(0, "e")
             for i in range(bufferSize):
                 tMap[l].insert(0, "B")
                 tMap[l].append("B")
+        list = ["n"] * (len(tMap[0])-2*bufferSize - 2)
+        list.insert(0, "nw")
+        list.append("ne")
+        list.insert(0, ["B"]*bufferSize)
+        list.append(["B"] * bufferSize)
+        tMap.insert(0, list)
+        list = ["s"] * (len(tMap[0]) - 2 * bufferSize - 2)
+        list.insert(0, "sw")
+        list.append("se")
+        list.insert(0, ["B"] * bufferSize)
+        list.append(["B"] * bufferSize)
+        tMap.append(list)
         list = ["B"] * len(tMap[0])
         for i in range(bufferSize):
             tMap.insert(0, list)
