@@ -1,6 +1,5 @@
 import math
 import os
-import random
 import sys
 import time
 import random
@@ -418,7 +417,7 @@ class Extractor(Tile):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Extractor"
         if self.resource in ["None", "Out of Bounds"]:
-            self.image = pg.transform.scale(pg.image.load("sprites\\tile_forest.png"), (TILE_SIZE, TILE_SIZE))
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_Extractor.png"), (TILE_SIZE, TILE_SIZE))
         else:
             self.image = pg.transform.scale(
                 pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
@@ -689,6 +688,9 @@ while True:
         player.ghost_tile.draw()
         if rc.show_recipes:
             SURF.blit(rc.image, (0, (SURF.get_height() - rc.image.get_height()) // 2))
+            img = pg.image.load("sprites\\hotbar.png")
+            SURF.blit(pg.transform.smoothscale(img, (int(W / 3), int(img.get_height() * W / (3 * img.get_width())))),
+                      (W / 3, H - (int(img.get_height() * W / (3 * img.get_width())))))
     else:
         f = pg.font.SysFont("Arial", 30)
         drawText(SURF, tutorial_text, pg.Color("white"), (TILE_SIZE, TILE_SIZE, SURF.get_width()-2*TILE_SIZE, SURF.get_height()-2*TILE_SIZE), f, True)
