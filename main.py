@@ -442,12 +442,14 @@ class Manufacturer(Tile):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Manufacturer"
-        self.image = pg.transform.scale(
-            pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
-            (TILE_SIZE, TILE_SIZE))
-        self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_factory.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
         self.dt = 0
-        if ghost:
+        if not ghost:
+            self.image = pg.transform.scale(
+                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
+                (TILE_SIZE, TILE_SIZE))
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_factory.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
+        else:
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_factory.png"), (TILE_SIZE, TILE_SIZE))
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
@@ -495,11 +497,13 @@ class Belt(Tile):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Belt"
-        self.image = pg.transform.scale(
-            pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
-            (TILE_SIZE, TILE_SIZE))
-        self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
-        if ghost:
+        if not ghost:
+            self.image = pg.transform.scale(
+                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
+                (TILE_SIZE, TILE_SIZE))
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
+        else:
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_conveyor.png"), (TILE_SIZE, TILE_SIZE))
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
 
@@ -507,11 +511,13 @@ class Intersection(Belt):
     def __init__(self, pos, angle, resource, ghost=False):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Intersection"
-        self.image = pg.transform.scale(
-            pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
-            (TILE_SIZE, TILE_SIZE))
-        self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
-        if ghost:
+        if not ghost:
+            self.image = pg.transform.scale(
+                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
+                (TILE_SIZE, TILE_SIZE))
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
+        else:
+            self.image = pg.transform.scale(pg.image.load("sprites\\tile_x_conveyor.png"), (TILE_SIZE, TILE_SIZE))
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
@@ -543,11 +549,13 @@ class Splitter(Belt):
         super().__init__(pos, angle, resource, ghost)
         self.type = "Splitter"
         self.split_bool = False  # False = right, True = left
-        self.image = pg.transform.scale(
-            pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
-            (TILE_SIZE, TILE_SIZE))
-        self.image.blit(pg.transform.scale(pg.image.load("sprites\\Splitter.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
+        if not ghost:
+            self.image = pg.transform.scale(
+                pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
+                (TILE_SIZE, TILE_SIZE))
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\Splitter.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
         if ghost:
+            self.image = pg.transform.scale(pg.image.load("sprites\\Splitter.png"), (TILE_SIZE, TILE_SIZE))
             self.image.fill((255, 255, 255, 125), None, pg.BLEND_RGBA_MULT)
 
     def tick(self):
