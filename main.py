@@ -169,6 +169,22 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Oil")
                 elif str == 'B':
                     newMap[y][x] = Tile(pos, 0, "BG")
+                elif str == 'n':
+                    newMap[y][x] = Tile(pos, 0, "E")
+                elif str == 'e':
+                    newMap[y][x] = Tile(pos, 270, "E")
+                elif str == 's':
+                    newMap[y][x] = Tile(pos, 180, "E")
+                elif str == 'w':
+                    newMap[y][x] = Tile(pos, 90, "E")
+                elif str == 'se':
+                    newMap[y][x] = Tile(pos, 180, "C")
+                elif str == 'ne':
+                    newMap[y][x] = Tile(pos, 270, "C")
+                elif str == 'nw':
+                    newMap[y][x] = Tile(pos, 0, "C")
+                elif str == 'sw':
+                    newMap[y][x] = Tile(pos, 90, "C")
                 else:
                     newMap[y][x] = Tile(pos, 0, "None")
         return Level(newMap, g, self.lNum)
@@ -271,6 +287,12 @@ class Tile:
             self.image = pg.transform.scale(pg.image.load("sprites\\OOB.png"), (TILE_SIZE, TILE_SIZE))
         elif self.resource == "BG":
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_Ocean.png"), (TILE_SIZE, TILE_SIZE))
+        elif self.resource == "E":
+            self.image = pg.transform.rotate(pg.transform.scale(pg.image.load("sprites\\tile_Ocean.png"), (TILE_SIZE, TILE_SIZE)), -angle)
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_Border Flat.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
+        elif self.resource == "C":
+            self.image = pg.transform.rotate(pg.transform.scale(pg.image.load("sprites\\tile_Ocean.png"), (TILE_SIZE, TILE_SIZE)), -angle)
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_Border Corner.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
         else:
             self.image = pg.transform.scale(
                 pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
