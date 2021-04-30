@@ -50,13 +50,13 @@ class Level:
         if self.number == 0:
             SURF.fill((0, 0, 0))
             rc.show_recipes = False
-            w = pg.font.SysFont("Arial", 90)
-            yw = w.render("You win!", True, pg.Color("white"))
-            fs = w.render("Final Score: " + str(score), True, pg.Color("white"))
-            hs = w.render("High Score: " + str(hiScore), True, pg.Color("white"))
-            SURF.blit(yw, [(SURF.get_width() - yw.get_width()) / 2, (SURF.get_height() - yw.get_height() - 200) / 2])
+            f = pg.font.SysFont("Comic Sans MS", 60, True)
+            yw = f.render("The Overlord is satisfied. You live to see another day.", True, pg.Color("red"))
+            fs = f.render("Final Score: " + str(score), True, pg.Color("red"))
+            hs = f.render("High Score: " + str(hiScore), True, pg.Color("red"))
+            SURF.blit(yw, [(SURF.get_width() - yw.get_width()) / 2, (SURF.get_height() - yw.get_height() - 150) / 2])
             SURF.blit(fs, [(SURF.get_width() - fs.get_width()) / 2, (SURF.get_height() - fs.get_height()) / 2])
-            SURF.blit(hs, [(SURF.get_width() - hs.get_width()) / 2, (SURF.get_height() - hs.get_height() + 200) / 2])
+            SURF.blit(hs, [(SURF.get_width() - hs.get_width()) / 2, (SURF.get_height() - hs.get_height() + 150) / 2])
         else:
             if self.dirty:
                 self.dirty = False
@@ -87,7 +87,7 @@ class Level:
                                             self.tile_array[tiley][tilex].get_y() + TILE_SIZE / 4 - (
                                                     i.offset * i.direction[1] * TILE_SIZE)))
         global transition_cd
-        if transition_cd > 0:
+        if transition_cd > 0 and self.number != 10 and self.number != 0:
             f = pg.font.SysFont("Comic Sans MS", 60, True)
             r = f.render("YOUR OFFERING HAS BEEN ACCEPTED", True, pg.Color(255, 32, 32))
             SURF.blit(r, [(SURF.get_width() - r.get_width()) / 2, (SURF.get_height() - r.get_height()) / 2])
@@ -183,6 +183,22 @@ class Loader:
                     newMap[y][x] = Tile(pos, 0, "Oil")
                 elif str == 'B':
                     newMap[y][x] = Tile(pos, 0, "BG")
+                elif str == 'n':
+                    newMap[y][x] = Tile(pos, 0, "E")
+                elif str == 'e':
+                    newMap[y][x] = Tile(pos, 270, "E")
+                elif str == 's':
+                    newMap[y][x] = Tile(pos, 180, "E")
+                elif str == 'w':
+                    newMap[y][x] = Tile(pos, 90, "E")
+                elif str == 'se':
+                    newMap[y][x] = Tile(pos, 180, "C")
+                elif str == 'ne':
+                    newMap[y][x] = Tile(pos, 270, "C")
+                elif str == 'nw':
+                    newMap[y][x] = Tile(pos, 0, "C")
+                elif str == 'sw':
+                    newMap[y][x] = Tile(pos, 90, "C")
                 else:
                     newMap[y][x] = Tile(pos, 0, "None")
         return Level(newMap, g, self.lNum)
@@ -285,6 +301,12 @@ class Tile:
             self.image = pg.transform.scale(pg.image.load("sprites\\OOB.png"), (TILE_SIZE, TILE_SIZE))
         elif self.resource == "BG":
             self.image = pg.transform.scale(pg.image.load("sprites\\tile_Ocean.png"), (TILE_SIZE, TILE_SIZE))
+        elif self.resource == "E":
+            self.image = pg.transform.rotate(pg.transform.scale(pg.image.load("sprites\\tile_Ocean.png"), (TILE_SIZE, TILE_SIZE)), -angle)
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_Border Flat.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
+        elif self.resource == "C":
+            self.image = pg.transform.rotate(pg.transform.scale(pg.image.load("sprites\\tile_Ocean.png"), (TILE_SIZE, TILE_SIZE)), -angle)
+            self.image.blit(pg.transform.scale(pg.image.load("sprites\\tile_Border Corner.png"), (TILE_SIZE, TILE_SIZE)), (0, 0))
         else:
             self.image = pg.transform.scale(
                 pg.image.load("sprites\\tile_grass_" + (str(random.randint(1, 3)) if not ghost else "1") + ".png"),
@@ -342,7 +364,7 @@ class Tile:
                     self.items.pop(i)
                 else:
                     i += 1
-        if len(self.items) > 10:
+        if len(self.items) > 20:
             self.items = [self.items[0]]
 
     def is_open(self, type):
@@ -502,7 +524,7 @@ class Manufacturer(Tile):
                 self.items.pop(i)
             else:
                 i += 1
-        if len(self.items) > 10:
+        if len(self.items) > 20:
             self.items = [self.items[0]]
 
 
@@ -553,7 +575,7 @@ class Intersection(Belt):
                 self.items.pop(i)
             else:
                 i += 1
-        if len(self.items) > 10:
+        if len(self.items) > 20:
             self.items = [self.items[0]]
 
 
@@ -595,7 +617,7 @@ class Splitter(Belt):
                 self.items.pop(i)
             else:
                 i += 1
-        if len(self.items) > 10:
+        if len(self.items) > 20:
             self.items = [self.items[0]]
 
 
@@ -695,7 +717,7 @@ player = Player()
 t = time.perf_counter()
 fps_arr = [1 / FPS] * 30
 tutorial_cleared = False
-tutorial_text = "The Overlord requires a tribute of industrial parts and machinery. To construct this machinery, you must extract resources and combine them into more developed goods, using extractors and manufacturers respectively. You can select these, as well as other important tiles, using the number pad. Left click to drop tiles,right click to delete them, and push r to rotate. Extractors act as belts, you cannot build on rocks, and The Overlord requires a constant influx of the target item to be satisfied. You can see the target item on the corner of The Overlord, and the recipes to manufacture items can be toggled with the tab key. The Overlord will give you a score based on the speed of your completion following each of the 10 levels. At any time, you may surrender to The Overlord with the escape key. Push any key to go to that level, or enter to start from the beginning."
+tutorial_text = "The Overlord requires a tribute of industrial parts and machinery. To construct this machinery, you must extract resources and combine them into more developed goods, using extractors and manufacturers respectively. You can select these, as well as other important tiles, using the number pad. Left click to drop tiles, right click to delete them, and push r to rotate. Extractors act as belts, you cannot build on rocks, and The Overlord requires a constant influx of the target item to be satisfied. You can see the target item on the corner of The Overlord, and the recipes to manufacture items can be toggled with the tab key. The Overlord will give you a score based on the speed of your completion following each of the 10 levels. At any time, you may surrender to The Overlord with the escape key, or reset your level with the backspace button. Push any key to go to that level, or enter to start from the beginning."
 score = 0
 hiScore = 0
 while True:
