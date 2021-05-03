@@ -1,4 +1,6 @@
-W - X
-- - E
-I - X
+nw n n n ne
+w W - X e
+w - - E e
+w I - X e
+sw s s s se
 Iron Bar

@@ -1,6 +1,8 @@
-W - W - X X - - - - - - - - C X
-I - I - X - - - - - - - - - - X
-- - - - - - - - - - W I - C - E
-W - I - X - - - - - - - - - - X
-I - W - X X - - - - - - - - C X
+nw n n n n n n n n n n n n n n n n ne
+w W - W - X X - - - - - - - - C X e
+w I - I - X - - - - - - - - - - X e
+w - - - - - - - - - - W I - C - E e
+w W - I - X - - - - - - - - - - X e
+w I - W - X X - - - - - - - - C X e
+sw s s s s s s s s s s s s s s s s se
 Engines

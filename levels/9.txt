@@ -1,8 +1,10 @@
-W W X C - - - W I - C - - - X
-I I X - - - - X - - - X - - X
-- - - - - - - - - X - - - - X
-- - - X X X X X X X X C - - E
-- - - - - - - - - X - - - - X
-I I X - - - - X - - - X - - X
-W W X C - - - W I - C - - - X
+nw n n n n n n n n n n n n n n n ne
+w W W X C - - - W I - C - - - X e
+w I I X - - - - X - - - X - - X e
+w - - - - - - - - - X - - - - X e
+w - - - X X X X X X X X C - - E e
+w - - - - - - - - - X - - - - X e
+w I I X - - - - X - - - X - - X e
+w W W X C - - - W I - C - - - X e
+sw s s s s s s s s s s s s s s s se
 Locomotives

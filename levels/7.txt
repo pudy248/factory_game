@@ -1,5 +1,7 @@
-X X X E X X X
-I - - - - - -
-- W - I - - -
-- - - W - C -
+nw n n n n n n n ne
+w X X X E X X X e
+w I - - - - - - e
+w - W - I - - - e
+w - - - W - C - e
+sw s s s s s s s se
 Machine Parts
