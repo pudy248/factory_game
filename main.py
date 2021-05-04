@@ -354,7 +354,7 @@ class Tile:
             self.items = [self.items[0]]
 
     def is_open(self, type):
-        if self.resource in ["Out of Bounds", "BG"]:
+        if self.resource in ["Out of Bounds", "BG", "E", "C"]:
             return False
         elif self.resource in ["Wood", "Oil", "Iron Ore", "Coal"] and type != "Extractor":
             return False
