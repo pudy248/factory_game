@@ -399,12 +399,13 @@ class Player:
             level.tile_array[self.get_y()][self.get_x()].resource)
 
     def remove(self, pos):
-        level.dirty = True
-        self.last_pos = pos
-        if self.get_tile() and level.tile_array[self.get_y()][self.get_x()].type != "Exit":
-            level.tile_array[self.get_y()][self.get_x()] = Tile(
-                [self.get_x(), self.get_y()], 0,
-                level.tile_array[self.get_y()][self.get_x()].resource)
+        if self.get_tile() and level.tile_array[self.get_y()][self.get_x()].resource not in ["E", "C", "BG"]:
+            level.dirty = True
+            self.last_pos = pos
+            if level.tile_array[self.get_y()][self.get_x()].type != "Exit":
+                level.tile_array[self.get_y()][self.get_x()] = Tile(
+                    [self.get_x(), self.get_y()], 0,
+                    level.tile_array[self.get_y()][self.get_x()].resource)
 
     def click(self, pos):
         self.last_pos = pos
