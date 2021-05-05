@@ -1,8 +1,0 @@
-nw n n n n n n ne
-w I - W - X X e
-w C - - - - X e
-w - - - - - X e
-w O - - - - X e
-w - - - - - E e
-sw s s s s s s se
-Consumer Goods
