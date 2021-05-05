@@ -336,7 +336,7 @@ class Tile:
     def tick(self):
         if self.type != "Tile":
             for i in self.items:
-                i.offset += TICK_RATE / FPS
+                i.offset += dt / TICK_RATE
                 if i.moved:
                     i.direction = self.direction
                     i.moved = False
@@ -459,7 +459,8 @@ class Extractor(Tile):
     def tick(self):
         # adds an item based on resources
         super(Extractor, self).tick()
-        self.dt += 1 / FPS * TICK_RATE
+        global dt
+        self.dt += dt / TICK_RATE
         if self.dt > 1 / TICK_RATE:
             self.items.append(Item(self.resource))
             self.dt -= 1 / TICK_RATE
@@ -481,7 +482,8 @@ class Manufacturer(Tile):
 
     def tick(self):
         # if Recipie Collection class says that the items in self.items can be made into a recipie, consumes them and outputs the result
-        self.dt += 1 / FPS * TICK_RATE
+        global dt
+        self.dt += dt
         if self.dt > 1 / TICK_RATE:
             if rc.get_recipe(self.items):
                 recipe = rc.get_recipe(self.items)
@@ -497,7 +499,7 @@ class Manufacturer(Tile):
                 self.dt -= 1 / TICK_RATE
         for i in self.items:
             if i.manufactured:
-                i.offset += TICK_RATE / FPS
+                i.offset += dt / TICK_RATE
             if i.moved:
                 i.direction = self.direction
                 i.moved = False
@@ -549,7 +551,7 @@ class Intersection(Belt):
 
     def tick(self):
         for i in self.items:
-            i.offset += TICK_RATE / FPS
+            i.offset += dt / TICK_RATE
             if i.moved:
                 i.moved = False
         i = 0
@@ -588,7 +590,7 @@ class Splitter(Belt):
     def tick(self):
         # Alternates between left and right
         for i in self.items:
-            i.offset += TICK_RATE / FPS
+            i.offset += dt / TICK_RATE
             if i.moved:
                 i.direction = self.direction.rotate(90 if self.split_bool else 270)
                 self.split_bool = not self.split_bool
@@ -633,8 +635,8 @@ class Exit(Tile):
         self.dt = 0
 
     def tick(self):
-        global level
-        self.dt += 1 / FPS * TICK_RATE
+        global level, dt
+        self.dt += dt
         if self.dt > 5 / TICK_RATE:
             self.items.append(Item(self.resource))
             self.dt -= 5 / TICK_RATE
@@ -709,6 +711,7 @@ load = Loader()
 level = load.load_level(9)
 player = Player()
 t = time.perf_counter()
+dt = 0
 fps_arr = [1 / FPS] * 30
 tutorial_cleared = False
 tutorial_text = "The Overlord requires a tribute of industrial parts and machinery. To construct this machinery, you must extract resources and combine them into more developed goods, using extractors and manufacturers respectively. You can select these, as well as other important tiles, using the number pad. Left click to drop tiles, right click to delete them, and push r to rotate. Extractors act as belts, you cannot build on rocks, and The Overlord requires a constant influx of the target item to be satisfied. You can see the target item on the corner of The Overlord, and the recipes to manufacture items can be toggled with the tab key. The Overlord will give you a score based on the speed of your completion following each of the 10 levels. At any time, you may surrender to The Overlord with the escape key, or reset your level with the backspace button. Push any key to go to that level, or enter to start from the beginning."
@@ -784,7 +787,8 @@ while True:
     if tutorial_cleared:
         player.move(pg.mouse.get_pos())
     pg.display.update()
-    fps_arr.append(time.perf_counter() - t)
+    dt = time.perf_counter() - t
+    fps_arr.append(dt)
     t = time.perf_counter()
     fps_arr.pop(0)
     clock.tick(FPS)
