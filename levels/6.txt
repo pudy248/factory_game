@@ -3,6 +3,6 @@ w W I - X X X e
 w - - - X X X e
 w O - - - - - e
 w - - - - - - e
-w - - C - - E e
+w - - C - X E e
 sw s s s s s s se
 Consumer Goods
