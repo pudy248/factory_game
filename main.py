@@ -39,9 +39,14 @@ class Level:
 
     def world_tick(self):
         global tutorial_cleared
+        done = False
         for tiley in range(self.length):
             for tilex in range(self.width):
-                self.tile_array[tiley][tilex].tick()
+                if self.tile_array[tiley][tilex].tick():
+                    done = True
+                    break
+            if done:
+                break
         if tutorial_cleared:
             self.time += sum(fps_arr) / 30
 
@@ -643,6 +648,8 @@ class Exit(Tile):
             if temp_item_num >= 5:
                 print("done")
                 level = level.next_level()
+                self.items = []
+                return True
             self.items = []
 
 
