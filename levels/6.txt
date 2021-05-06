@@ -1,8 +1,8 @@
 nw n n n n n n ne
-w I - W - X X e
-w C - - - - X e
-w - - - - - X e
-w O - - - - X e
-w - - - - - E e
+w W I - X X X e
+w - - - X X X e
+w O - - - - - e
+w - - - - - - e
+w - - C - X E e
 sw s s s s s s se
 Consumer Goods
