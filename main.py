@@ -336,7 +336,7 @@ class Tile:
     def tick(self):
         if self.type != "Tile":
             for i in self.items:
-                i.offset += dt / TICK_RATE
+                i.offset += dt * TICK_RATE
                 if i.moved:
                     i.direction = self.direction
                     i.moved = False
@@ -460,7 +460,7 @@ class Extractor(Tile):
         # adds an item based on resources
         super(Extractor, self).tick()
         global dt
-        self.dt += dt / TICK_RATE
+        self.dt += dt
         if self.dt > 1 / TICK_RATE:
             self.items.append(Item(self.resource))
             self.dt -= 1 / TICK_RATE
@@ -551,7 +551,7 @@ class Intersection(Belt):
 
     def tick(self):
         for i in self.items:
-            i.offset += dt / TICK_RATE
+            i.offset += dt * TICK_RATE
             if i.moved:
                 i.moved = False
         i = 0
@@ -590,7 +590,7 @@ class Splitter(Belt):
     def tick(self):
         # Alternates between left and right
         for i in self.items:
-            i.offset += dt / TICK_RATE
+            i.offset += dt * TICK_RATE
             if i.moved:
                 i.direction = self.direction.rotate(90 if self.split_bool else 270)
                 self.split_bool = not self.split_bool
