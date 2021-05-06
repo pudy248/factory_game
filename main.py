@@ -15,7 +15,7 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
 #####CONSTANTS#####
 FPS = 60
-TICK_RATE = 1.5  # ticks per second
+TICK_RATE = 1  # ticks per second
 
 if SURF.get_width() / 20 > SURF.get_height() / 10:
     TILE_SIZE = SURF.get_height() // 10  # dimensions of each tile in pixels
@@ -499,7 +499,7 @@ class Manufacturer(Tile):
                 self.dt -= 1 / TICK_RATE
         for i in self.items:
             if i.manufactured:
-                i.offset += dt / TICK_RATE
+                i.offset += dt * TICK_RATE
             if i.moved:
                 i.direction = self.direction
                 i.moved = False
