@@ -431,8 +431,6 @@ class Player:
         elif self.is_in_level():
             if self.can_place():
                 self.place()
-        else:
-            print("none")
 
 
     def move(self, pos):
