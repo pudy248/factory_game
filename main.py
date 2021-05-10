@@ -15,7 +15,7 @@ SURF = pg.display.set_mode((W, H), pg.NOFRAME)
 
 #####CONSTANTS#####
 FPS = 60
-TICK_RATE = 1  # ticks per second
+TICK_RATE = 1.5  # ticks per second
 
 if SURF.get_width() / 20 > SURF.get_height() / 10:
     TILE_SIZE = SURF.get_height() // 10  # dimensions of each tile in pixels
@@ -101,7 +101,7 @@ class Level:
     def next_level(self):
         global load, score, hiScore, transition_cd
         transition_cd = 3
-        score += 10 * int(10000 * (self.number ** 2.75) / (self.time - (10 / TICK_RATE)))
+        score += 5 * int(100 * (self.number ** 2.75) / (self.time))
         if self.number != 10:
             return load.load_level(self.number + 1)
         else:
