@@ -1,0 +1,4 @@
+nw n n n ne
+w W - E e
+sw s s s se
+Wood

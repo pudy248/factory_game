@@ -1,0 +1,6 @@
+nw n n n n n ne
+w X X - - - e
+w O - - - - e
+w X X - - E e
+sw s s s s s se
+Plastic

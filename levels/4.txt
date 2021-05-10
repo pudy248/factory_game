@@ -1,0 +1,5 @@
+nw n n n n ne
+w W - - X e
+w I - - E e
+sw s s s s se
+Screws

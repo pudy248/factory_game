@@ -1,0 +1,12 @@
+nw n n n n n n n n n n n n n n n n n ne
+w - - - - - - W - - - - - - I - - C e
+w - C - - - - - - - - - C - - - - - e
+w - - - I - - - I - - - - - - - - - e
+w - - - - - - - - - - - - W - - - - e
+w I - - - - W - - W - - - - - - - - e
+w - - - - - - - - - - - - I - - - I e
+w - - - I - - O - - C - - - - - - - e
+w - W - - - - - - - - - - - - - - - e
+w - - - - - W - - - - - - - - - - E e
+sw s s s s s s s s s s s s s s s s s se
+Automobiles
