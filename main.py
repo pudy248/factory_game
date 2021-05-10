@@ -101,7 +101,7 @@ class Level:
     def next_level(self):
         global load, score, hiScore, transition_cd
         transition_cd = 3
-        score += 5 * int(100 * (self.number ** 2.75) / (self.time))
+        score += 5 * int(100 * (self.number ** 2) / (self.time / 2))
         if self.number != 10:
             return load.load_level(self.number + 1)
         else:
