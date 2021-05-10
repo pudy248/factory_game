@@ -651,7 +651,8 @@ class Exit(Tile):
 
     def tick(self):
         global level, dt
-        self.dt += dt
+        if len(self.items) > 0:
+            self.dt += dt
         if self.dt > 5 / TICK_RATE:
             self.items.append(Item(self.resource))
             self.dt -= 5 / TICK_RATE
