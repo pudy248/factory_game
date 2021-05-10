@@ -380,7 +380,7 @@ class Player:
         self.ghost_tile = Tile(self.last_pos, 0, "None")
 
     def is_in_level(self):  # Detects if pos is within the level
-        return self.get_x() < TILE_SIZE and self.get_y() < TILE_SIZE
+        return self.get_x() < len(level.tile_array) and self.get_y() < len(level.tile_array[0])
 
     def can_place(self):  # should work
         return self.selected_tile and self.get_tile() and self.get_tile().is_open(self.selected_tile)
@@ -414,9 +414,24 @@ class Player:
 
     def click(self, pos):
         self.last_pos = pos
-        if self.is_in_level():
+        if W / 3 <= pos[0] <= 2 * W / 3 and hotbar_pos <= pos[1] <= H:
+            x = int((pos[0] - W / 3)/(W / 18))
+            if x == 0:
+                self.selected_tile = "Extractor"
+            elif x == 1:
+                self.selected_tile = "Manufacturer"
+            elif x == 2:
+                self.selected_tile = "Belt"
+            elif x == 3:
+                self.selected_tile = "Intersection"
+            elif x == 4:
+                self.selected_tile = "Splitter"
+            elif x == 5:
+                self.selected_tile = "Void"
+        elif self.is_in_level():
             if self.can_place():
                 self.place()
+
 
     def move(self, pos):
         self.last_pos = pos
@@ -730,6 +745,8 @@ while True:
         if rc.show_recipes:
             SURF.blit(rc.image, (0, (SURF.get_height() - rc.image.get_height()) // 2))
             img = pg.image.load("sprites\\hotbar.png")
+            # print(str(W/3) + ", " + str(H - (int(img.get_height() * W / (3 * img.get_width())))) + ", " + str(W//3) + ", " + str(int(img.get_height() * W / (3 * img.get_width()))))
+            hotbar_pos = H - (int(img.get_height() * W / (3 * img.get_width())))
             SURF.blit(pg.transform.smoothscale(img, (int(W / 3), int(img.get_height() * W / (3 * img.get_width())))),
                       (W / 3, H - (int(img.get_height() * W / (3 * img.get_width())))))
     else:
