@@ -504,7 +504,7 @@ class Manufacturer(Tile):
                 recipe = rc.get_recipe(self.items)
                 for i in recipe.inputs:
                     for index in range(len(self.items)):
-                        if self.items[index].name == i:
+                        if not self.items[index].manufactured:
                             self.items.pop(index)
                             break
                 outputs = recipe.get_outputs()
