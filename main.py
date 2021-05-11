@@ -380,7 +380,7 @@ class Player:
         self.ghost_tile = Tile(self.last_pos, 0, "None")
 
     def is_in_level(self):  # Detects if pos is within the level
-        return self.get_x() < len(level.tile_array) and self.get_y() < len(level.tile_array[0])
+        return self.get_x() < len(level.tile_array[0]) and self.get_y() < len(level.tile_array)
 
     def can_place(self):  # should work
         return self.selected_tile and self.get_tile() and self.get_tile().is_open(self.selected_tile)
