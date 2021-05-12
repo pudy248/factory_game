@@ -683,6 +683,7 @@ class Exit(Tile):
             if temp_item_num >= 5:
                 print("done")
                 level = level.next_level()
+                player.move((W / 2, H / 2))
                 self.items = []
                 return True
             self.items = []
@@ -823,9 +824,10 @@ t = time.perf_counter()
 dt = 0
 fps_arr = [1 / FPS] * 30
 tutorial_cleared = False
-tutorial_text = "The Overlord requires a tribute of industrial parts and machinery. To construct this machinery, you must extract resources and combine them into more developed goods, using extractors and manufacturers respectively. You can select these, as well as other important tiles, using the number pad. Left click to drop tiles, right click to delete them, and push r to rotate. Extractors act as belts, you cannot build on rocks, and The Overlord requires a constant influx of the target item to be satisfied. You can see the target item on the corner of The Overlord, and the recipes to manufacture items can be toggled with the tab key. The Overlord will give you a score based on the speed of your completion following each of the 10 levels. At any time, you may surrender to The Overlord with the escape key, or reset your level with the backspace button. Push any key to go to that level, or enter to start from the beginning."
+tutorial_text = "The Overlord requires a tribute of industrial parts and machinery. To construct this machinery, you must extract resources and combine them into more developed goods, using extractors and manufacturers respectively. You can select these, as well as other important tiles, using the number pad. Left click to drop tiles, right click to delete them, and push r to rotate. Extractors act as belts, you cannot build on rocks, and The Overlord requires a constant influx of the target item to be satisfied. You can see the target item on the corner of The Overlord, and the recipes to manufacture items can be toggled with the tab key. The Overlord will give you a score based on the speed of your completion following each of the 10 levels. At any time, you may surrender to The Overlord with the escape key, or reset your level with the backspace button. Push any key to go to that level, or enter to start from the beginning. You can toggle between keyboard and mouse controls with the left shift key."
 score = 0
 hiScore = 0
+keyboard = False
 while True:
     if score > int(open("highscore.txt").read()):
         hiScore = score
@@ -866,15 +868,45 @@ while True:
                         print(level.number)
                     queue.event("start")
                     tutorial_cleared = True
+                    player.move((W/2, H/2))
             else:
+                if keyboard:
+                    if event.key == pg.K_a:
+                        player.move((player.last_pos[0] - TILE_SIZE, player.last_pos[1]))
+                    elif event.key == pg.K_d:
+                        player.move((player.last_pos[0] + TILE_SIZE, player.last_pos[1]))
+                    elif event.key == pg.K_w:
+                        player.move((player.last_pos[0], player.last_pos[1] - TILE_SIZE))
+                    elif event.key == pg.K_s:
+                        player.move((player.last_pos[0], player.last_pos[1] + TILE_SIZE))
+                    elif event.key == pg.K_RIGHT:
+                        player.tile_angle = 0
+                        player.move(player.last_pos)
+                    elif event.key == pg.K_LEFT:
+                        player.tile_angle = 180
+                        player.move(player.last_pos)
+                    elif event.key == pg.K_UP:
+                        player.tile_angle = 90
+                        player.move(player.last_pos)
+                    elif event.key == pg.K_DOWN:
+                        player.tile_angle = 270
+                        player.move(player.last_pos)
+                    elif event.key == pg.K_RETURN or event.key == pg.K_SPACE:
+                        player.click(player.last_pos)
+                    elif event.key == pg.K_RSHIFT:
+                        player.remove(player.last_pos)
                 if event.key == pg.K_TAB:
                     rc.show_recipes = not rc.show_recipes
                     queue.event("tab")
                 elif event.key == pg.K_BACKSPACE:
                     level = load.load_level(level.number)
+                elif event.key == pg.K_LSHIFT:
+                    keyboard = not keyboard
                 else:
                     player.select(event.key)
-        elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared:
+                    if keyboard:
+                        player.move(player.last_pos)
+        elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared and not keyboard:
             if event.button == pg.BUTTON_LEFT:
                 player.click(event.pos)
                 queue.event("click")
@@ -899,7 +931,7 @@ while True:
                     tm.get_width() + sc.get_width() + hs.get_width())) / 2 + tm.get_width() + sc.get_width(), 5))
         scoreSurf.set_alpha(150)
         SURF.blit(scoreSurf, ((W - ww) / 2, (TILE_SIZE - tm.get_height()) / 2))
-    if tutorial_cleared:
+    if tutorial_cleared and not keyboard:
         player.move(pg.mouse.get_pos())
     pg.display.update()
     dt = time.perf_counter() - t
