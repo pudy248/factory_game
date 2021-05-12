@@ -436,6 +436,10 @@ class Player:
                 queue.event("VoidSelect")
         elif self.is_in_level():
             if self.can_place():
+                if self.selected_tile == "Extractor":
+                    queue.event("ExtractorPlace")
+                elif self.selected_tile == "Belt":
+                    queue.event("BeltPlace")
                 self.place()
 
 
@@ -733,7 +737,7 @@ class Listener:
         for e in event_list:
             if e == self.event:
                 self.func(*self.args)
-                queue.cancel_event(self.event)
+                #queue.cancel_event(self.event)
                 queue.remove_listener(self)
 
 
@@ -796,7 +800,10 @@ class TutorialHandler:
 queue = EventQueue()
 tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click"),
              TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "click", "tab"),
-             TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "tab", "ExtractorSelect")]  # list of TutorialElement objects
+             TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "tab", "ExtractorSelect"),
+             TE("Click on a resource tile to place the extractor", [50, 50], "ExtractorSelect", "ExtractorPlace"),
+             TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "ExtractorPlace", "BeltSelect"),
+             TE("Click on any non-resource tile to place the belt", [50, 50], "BeltSelect", "BeltPlace")]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
