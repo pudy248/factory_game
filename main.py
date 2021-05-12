@@ -418,16 +418,22 @@ class Player:
             x = int((pos[0] - W / 3)/(W / 18))
             if x == 0:
                 self.selected_tile = "Extractor"
+                queue.event("ExtractorSelect")
             elif x == 1:
                 self.selected_tile = "Manufacturer"
+                queue.event("ManufacturerSelect")
             elif x == 2:
                 self.selected_tile = "Belt"
+                queue.event("BeltSelect")
             elif x == 3:
                 self.selected_tile = "Intersection"
+                queue.event("IntersectionSelect")
             elif x == 4:
                 self.selected_tile = "Splitter"
+                queue.event("SplitterSelect")
             elif x == 5:
                 self.selected_tile = "Void"
+                queue.event("VoidSelect")
         elif self.is_in_level():
             if self.can_place():
                 self.place()
@@ -441,16 +447,22 @@ class Player:
     def select(self, key):
         if key == pg.K_1:
             self.selected_tile = "Extractor"
+            queue.event("ExtractorSelect")
         elif key == pg.K_2:
             self.selected_tile = "Manufacturer"
+            queue.event("ManufacturerSelect")
         elif key == pg.K_3:
             self.selected_tile = "Belt"
+            queue.event("BeltSelect")
         elif key == pg.K_4:
             self.selected_tile = "Intersection"
+            queue.event("IntersectionSelect")
         elif key == pg.K_5:
             self.selected_tile = "Splitter"
+            queue.event("SplitterSelect")
         elif key == pg.K_6:
             self.selected_tile = "Void"
+            queue.event("VoidSelect")
         elif key == pg.K_r:
             self.tile_angle = (self.tile_angle - 90) % 360
 
@@ -782,7 +794,9 @@ class TutorialHandler:
 
 
 queue = EventQueue()
-tutorials = [TE("test", [50, 50], "start", "stop")]  # list of TutorialElement objects
+tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click"),
+             TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "click", "tab"),
+             TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "tab", "ExtractorSelect")]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
@@ -844,21 +858,22 @@ while True:
                         print(lvlNum)
                         level = load.load_level(lvlNum)
                         print(level.number)
+                    queue.event("start")
                     tutorial_cleared = True
             else:
                 if event.key == pg.K_TAB:
                     rc.show_recipes = not rc.show_recipes
+                    queue.event("tab")
                 elif event.key == pg.K_BACKSPACE:
                     level = load.load_level(level.number)
                 else:
                     player.select(event.key)
         elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared:
             if event.button == pg.BUTTON_LEFT:
-                queue.event("start")
                 player.click(event.pos)
+                queue.event("click")
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
-                queue.event("stop")
     f = pg.font.SysFont("Arial", 15)
     s = pg.font.SysFont("Arial Bold", 50)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
