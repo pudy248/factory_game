@@ -711,6 +711,79 @@ def drawText(surface, text, color, rect, font, aa=False, bkg=None):
     return text
 
 
+class Listener:
+    def __init__(self, event: str, func, args: list):
+        self.event = event
+        self.func = func
+        self.args = args
+
+    def check(self, event_list: list):
+        for e in event_list:
+            if e == self.event:
+                self.func(*self.args)
+                queue.cancel_event(self.event)
+                queue.remove_listener(self)
+
+
+class EventQueue:
+    def __init__(self):
+        self.queue = []
+        self.listeners = []
+
+    def event(self, event: str):
+        self.queue.append(event)
+
+    def cancel_event(self, event: str):
+        self.queue.remove(event)
+
+    def add_listener(self, listener: Listener):
+        self.listeners.append(listener)
+
+    def remove_listener(self, listener: Listener):
+        self.listeners.remove(listener)
+
+    def listener_check(self):
+        for l in self.listeners:
+            l.check(self.queue)
+
+
+class TE:
+    def __init__(self, text: str, position: list, trigger: str, dismiss: str):
+        self.enabled = False
+        self.text = text
+        self.position = position
+        global queue
+        queue.add_listener(Listener(trigger, self.start, []))
+        queue.add_listener(Listener(dismiss, self.stop, []))
+
+    def start(self):
+        self.enabled = True
+        print("hi there!")
+
+    def stop(self):
+        self.enabled = False
+        print("bye!")
+        handler.tutorials.remove(self)
+
+    def update(self):
+        if self.enabled:
+            drawText(SURF, self.text, pg.Color('white'), pg.Rect([self.position[0], self.position[1], 400, 200]),
+                     pg.font.SysFont("Arial", 30), True)
+
+
+class TutorialHandler:
+    def __init__(self, tutorial_list: list):
+        self.tutorials = tutorial_list
+
+    def frame_update(self):
+        queue.listener_check()
+        for t in self.tutorials:
+            t.update()
+
+
+queue = EventQueue()
+tutorials = [TE("test", [50, 50], "start", "stop")]  # list of TutorialElement objects
+handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
                        Recipe(["Engines", "Springs", "Coal"], ["Locomotives"]),
@@ -781,13 +854,16 @@ while True:
                     player.select(event.key)
         elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared:
             if event.button == pg.BUTTON_LEFT:
+                queue.event("start")
                 player.click(event.pos)
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
+                queue.event("stop")
     f = pg.font.SysFont("Arial", 15)
     s = pg.font.SysFont("Arial Bold", 50)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
     SURF.blit(r, (5, 5))
+    handler.frame_update()
     if level.number != 0 and tutorial_cleared:
         tm = s.render("Time: " + str(int(level.time)) + "   ", True, pg.Color("white"))
         sc = s.render("   Score: " + str(int(score)) + "   ", True, pg.Color("white"))
