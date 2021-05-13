@@ -768,17 +768,16 @@ class TE:
         self.enabled = False
         self.text = text
         self.position = position
+        self.dismiss = dismiss
         global queue
         queue.add_listener(Listener(trigger, self.start, []))
-        queue.add_listener(Listener(dismiss, self.stop, []))
 
     def start(self):
         self.enabled = True
-        print("hi there!")
+        queue.add_listener(Listener(self.dismiss, self.stop, []))
 
     def stop(self):
         self.enabled = False
-        print("bye!")
         handler.tutorials.remove(self)
 
     def update(self):
