@@ -808,16 +808,16 @@ class TutorialHandler:
     def frame_update(self):
         queue.listener_check()
         if len(self.tutorials) > 0:
-            self.tutorials[0].update()
+            self.tutorials[level.number + 1][0].update()
 
 
 queue = EventQueue()
-tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "1"),
+tutorials = [[TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "1"),
              TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "1", "tab", "2"),
              TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "2", "ExtractorSelect", "3"),
              TE("Click on a resource tile to place the extractor", [50, 50], "3", "ExtractorPlace", "4"),
              TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "4", "BeltSelect", "5"),
-             TE("Click on any non-resource tile to place the belt", [50, 50], "5", "BeltPlace", "6")]  # list of TutorialElement objects
+             TE("Click on any non-resource tile to place the belt", [50, 50], "5", "BeltPlace", "6")]]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
