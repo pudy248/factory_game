@@ -757,7 +757,8 @@ class EventQueue:
         self.listeners.append(listener)
 
     def remove_listener(self, listener: Listener):
-        self.listeners.remove(listener)
+        if listener in self.listeners:
+            self.listeners.remove(listener)
 
     def listener_check(self):
         for l in self.listeners:
@@ -786,7 +787,8 @@ class TE:
     def stop(self):
         self.enabled = False
         queue.event(self.dismiss_event)
-        handler.tutorials.remove(self)
+        if self in handler.tutorials:
+            handler.tutorials.remove(self)
 
     def add_listener(self):
         queue.add_listener(Listener(self.trigger, self.start, []))
