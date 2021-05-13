@@ -774,24 +774,22 @@ class TE:
         self.dismiss = dismiss
         global queue
         if activation_event is not None:
-            queue.add_listener(Listener(activation_event, self.add_listeners, []))
+            queue.add_listener(Listener(activation_event, self.add_listener, []))
         else:
-            self.add_listeners()
+            self.add_listener()
 
 
     def start(self):
         self.enabled = True
-        print("Event start")
+        queue.add_listener(Listener(self.dismiss, self.stop, []))
 
     def stop(self):
         self.enabled = False
         queue.event(self.dismiss_event)
         handler.tutorials.remove(self)
-        print("Event stop")
 
-    def add_listeners(self):
+    def add_listener(self):
         queue.add_listener(Listener(self.trigger, self.start, []))
-        queue.add_listener(Listener(self.dismiss, self.stop, []))
 
     def update(self):
         if self.enabled:
