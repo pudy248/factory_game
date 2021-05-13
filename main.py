@@ -418,28 +418,18 @@ class Player:
             x = int((pos[0] - W / 3)/(W / 18))
             if x == 0:
                 self.selected_tile = "Extractor"
-                queue.event("ExtractorSelect")
             elif x == 1:
                 self.selected_tile = "Manufacturer"
-                queue.event("ManufacturerSelect")
             elif x == 2:
                 self.selected_tile = "Belt"
-                queue.event("BeltSelect")
             elif x == 3:
                 self.selected_tile = "Intersection"
-                queue.event("IntersectionSelect")
             elif x == 4:
                 self.selected_tile = "Splitter"
-                queue.event("SplitterSelect")
             elif x == 5:
                 self.selected_tile = "Void"
-                queue.event("VoidSelect")
         elif self.is_in_level():
             if self.can_place():
-                if self.selected_tile == "Extractor":
-                    queue.event("ExtractorPlace")
-                elif self.selected_tile == "Belt":
-                    queue.event("BeltPlace")
                 self.place()
 
 
@@ -451,22 +441,16 @@ class Player:
     def select(self, key):
         if key == pg.K_1:
             self.selected_tile = "Extractor"
-            queue.event("ExtractorSelect")
         elif key == pg.K_2:
             self.selected_tile = "Manufacturer"
-            queue.event("ManufacturerSelect")
         elif key == pg.K_3:
             self.selected_tile = "Belt"
-            queue.event("BeltSelect")
         elif key == pg.K_4:
             self.selected_tile = "Intersection"
-            queue.event("IntersectionSelect")
         elif key == pg.K_5:
             self.selected_tile = "Splitter"
-            queue.event("SplitterSelect")
         elif key == pg.K_6:
             self.selected_tile = "Void"
-            queue.event("VoidSelect")
         elif key == pg.K_r:
             self.tile_angle = (self.tile_angle - 90) % 360
 
@@ -738,7 +722,7 @@ class Listener:
         for e in event_list:
             if e == self.event:
                 self.func(*self.args)
-                #queue.cancel_event(self.event)
+                queue.cancel_event(self.event)
                 queue.remove_listener(self)
 
 
@@ -765,25 +749,35 @@ class EventQueue:
 
 
 class TE:
-    def __init__(self, text: str, position: list, trigger: str, dismiss: str):
+    def __init__(self, text: str, position: list, trigger: str, dismiss: str, activate_event: str, dismiss_event: str):
         self.enabled = False
         self.text = text
         self.position = position
+        self.dismiss_event = dismiss_event
+        self.activate_event = activate_event
+        self.trigger = trigger
         self.dismiss = dismiss
         global queue
-        queue.add_listener(Listener(trigger, self.start, []))
+        queue.add_listener(Listener(activate_event, self.add_listeners, []))
+
 
     def start(self):
         self.enabled = True
-        queue.add_listener(Listener(self.dismiss, self.stop, []))
+        print("Event start")
 
     def stop(self):
         self.enabled = False
+        queue.event(self.dismiss_event)
         handler.tutorials.remove(self)
+        print("Event stop")
+
+    def add_listeners(self):
+        queue.add_listener(Listener(self.trigger, self.start, []))
+        queue.add_listener(Listener(self.dismiss, self.stop, []))
 
     def update(self):
         if self.enabled:
-            drawText(SURF, self.text, pg.Color('white'), pg.Rect([self.position[0], self.position[1], 400, 200]),
+            drawText(SURF, self.text, pg.Color('white'), pg.Rect([self.position[0], self.position[1], W / 4, H]),
                      pg.font.SysFont("Arial", 30), True)
 
 
@@ -793,17 +787,14 @@ class TutorialHandler:
 
     def frame_update(self):
         queue.listener_check()
-        for t in self.tutorials:
-            t.update()
+        self.tutorials[0].update()
 
 
 queue = EventQueue()
-tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click"),
-             TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "click", "tab"),
-             TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "tab", "ExtractorSelect"),
-             TE("Click on a resource tile to place the extractor", [50, 50], "ExtractorSelect", "ExtractorPlace"),
-             TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "ExtractorPlace", "BeltSelect"),
-             TE("Click on any non-resource tile to place the belt", [50, 50], "BeltSelect", "BeltPlace")]  # list of TutorialElement objects
+tutorials = [  # list of TutorialElement objects
+    TE("Hi, welcome to FactoryGame! Left click to continue.", [3 * H / 5, H / 3], "LevelStart1", "LC", "next1"),
+    TE("To start, click on the Extractor in the hotbar", [W / 3, 4 * H / 5], "RC", "ExtractorSelect", "next1" "next2"),
+]
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
@@ -827,6 +818,7 @@ tutorial_cleared = False
 tutorial_text = "The Overlord requires a tribute of industrial parts and machinery. To construct this machinery, you must extract resources and combine them into more developed goods, using extractors and manufacturers respectively. You can select these, as well as other important tiles, using the number pad. Left click to drop tiles, right click to delete them, and push r to rotate. Extractors act as belts, you cannot build on rocks, and The Overlord requires a constant influx of the target item to be satisfied. You can see the target item on the corner of The Overlord, and the recipes to manufacture items can be toggled with the tab key. The Overlord will give you a score based on the speed of your completion following each of the 10 levels. At any time, you may surrender to The Overlord with the escape key, or reset your level with the backspace button. Push any key to go to that level, or enter to start from the beginning. You can toggle between keyboard and mouse controls with the left shift key."
 score = 0
 hiScore = 0
+queue.event("GameOpen")
 keyboard = False
 while True:
     if score > int(open("highscore.txt").read()):
@@ -865,8 +857,7 @@ while True:
                     else:
                         print(lvlNum)
                         level = load.load_level(lvlNum)
-                        print(level.number)
-                    queue.event("start")
+                        queue.event("LevelStart" + str(level.number))
                     tutorial_cleared = True
                     player.move((W/2, H/2))
             else:
@@ -897,7 +888,6 @@ while True:
                         player.remove(player.last_pos)
                 if event.key == pg.K_TAB:
                     rc.show_recipes = not rc.show_recipes
-                    queue.event("tab")
                 elif event.key == pg.K_BACKSPACE:
                     level = load.load_level(level.number)
                 elif event.key == pg.K_LSHIFT:
@@ -909,9 +899,10 @@ while True:
         elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared and not keyboard:
             if event.button == pg.BUTTON_LEFT:
                 player.click(event.pos)
-                queue.event("click")
+                queue.event("LC")
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
+                queue.event("RC")
     f = pg.font.SysFont("Arial", 15)
     s = pg.font.SysFont("Arial Bold", 50)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
