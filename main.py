@@ -785,18 +785,6 @@ while True:
                         player.move((player.last_pos[0], player.last_pos[1] - TILE_SIZE))
                     elif event.key == pg.K_s:
                         player.move((player.last_pos[0], player.last_pos[1] + TILE_SIZE))
-                    elif event.key == pg.K_RIGHT:
-                        player.tile_angle = 0
-                        player.move(player.last_pos)
-                    elif event.key == pg.K_LEFT:
-                        player.tile_angle = 180
-                        player.move(player.last_pos)
-                    elif event.key == pg.K_UP:
-                        player.tile_angle = 90
-                        player.move(player.last_pos)
-                    elif event.key == pg.K_DOWN:
-                        player.tile_angle = 270
-                        player.move(player.last_pos)
                     elif event.key == pg.K_RETURN or event.key == pg.K_SPACE:
                         player.click(player.last_pos)
                     elif event.key == pg.K_RSHIFT:
@@ -807,6 +795,18 @@ while True:
                     level = load.load_level(level.number)
                 elif event.key == pg.K_LSHIFT:
                     keyboard = not keyboard
+                elif event.key == pg.K_RIGHT:
+                    player.tile_angle = 0
+                    player.move(player.last_pos)
+                elif event.key == pg.K_LEFT:
+                    player.tile_angle = 180
+                    player.move(player.last_pos)
+                elif event.key == pg.K_UP:
+                    player.tile_angle = 90
+                    player.move(player.last_pos)
+                elif event.key == pg.K_DOWN:
+                    player.tile_angle = 270
+                    player.move(player.last_pos)
                 else:
                     player.select(event.key)
                     if keyboard:
