@@ -36,6 +36,9 @@ class Level:
         self.dirty = True
         self.time = 0
         self.transition_cd = 0
+        if self.number > 0:
+            global player
+            player.move((W / 2, H / 2))
 
     def world_tick(self):
         global tutorial_cleared
@@ -679,9 +682,7 @@ class Exit(Tile):
                 elif i.name != "None":
                     self.items = []
                     temp_item_num = 0
-                    print("REJECTED")
             if temp_item_num >= 5:
-                print("done")
                 level = level.next_level()
                 player.move((W / 2, H / 2))
                 self.items = []
@@ -830,7 +831,7 @@ rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], [
                        Recipe(["Steel Bar"], ["Steel Tubes"]),
                        Recipe(["Steel Tubes"], ["Springs"])))
 load = Loader()
-level = load.load_level(9)
+level = load.load_level(0)
 player = Player()
 t = time.perf_counter()
 dt = 0
@@ -854,7 +855,6 @@ while True:
         if rc.show_recipes:
             SURF.blit(rc.image, (0, (SURF.get_height() - rc.image.get_height()) // 2))
             img = pg.image.load("sprites\\hotbar.png")
-            # print(str(W/3) + ", " + str(H - (int(img.get_height() * W / (3 * img.get_width())))) + ", " + str(W//3) + ", " + str(int(img.get_height() * W / (3 * img.get_width()))))
             hotbar_pos = H - (int(img.get_height() * W / (3 * img.get_width())))
             SURF.blit(pg.transform.smoothscale(img, (int(W / 3), int(img.get_height() * W / (3 * img.get_width())))),
                       (W / 3, H - (int(img.get_height() * W / (3 * img.get_width())))))
@@ -870,13 +870,14 @@ while True:
             sys.exit()
         elif event.type == pg.KEYDOWN:
             numKeys = [pg.K_RETURN, pg.K_1, pg.K_2, pg.K_3, pg.K_4, pg.K_5, pg.K_6, pg.K_7, pg.K_8, pg.K_9, pg.K_0]
+            if event.key == pg.K_LSHIFT:
+                keyboard = not keyboard
             if not tutorial_cleared:
                 if event.key in numKeys:
                     lvlNum = numKeys.index(event.key)
                     if lvlNum == 0:
                         level = load.load_level(1)
                     else:
-                        print(lvlNum)
                         level = load.load_level(lvlNum)
                         print(level.number)
                     queue.event("start")
@@ -892,18 +893,6 @@ while True:
                         player.move((player.last_pos[0], player.last_pos[1] - TILE_SIZE))
                     elif event.key == pg.K_s:
                         player.move((player.last_pos[0], player.last_pos[1] + TILE_SIZE))
-                    elif event.key == pg.K_RIGHT:
-                        player.tile_angle = 0
-                        player.move(player.last_pos)
-                    elif event.key == pg.K_LEFT:
-                        player.tile_angle = 180
-                        player.move(player.last_pos)
-                    elif event.key == pg.K_UP:
-                        player.tile_angle = 90
-                        player.move(player.last_pos)
-                    elif event.key == pg.K_DOWN:
-                        player.tile_angle = 270
-                        player.move(player.last_pos)
                     elif event.key == pg.K_RETURN or event.key == pg.K_SPACE:
                         player.click(player.last_pos)
                     elif event.key == pg.K_RSHIFT:
@@ -913,8 +902,18 @@ while True:
                     queue.event("tab")
                 elif event.key == pg.K_BACKSPACE:
                     level = load.load_level(level.number)
-                elif event.key == pg.K_LSHIFT:
-                    keyboard = not keyboard
+                elif event.key == pg.K_RIGHT:
+                    player.tile_angle = 0
+                    player.move(player.last_pos)
+                elif event.key == pg.K_LEFT:
+                    player.tile_angle = 180
+                    player.move(player.last_pos)
+                elif event.key == pg.K_UP:
+                    player.tile_angle = 90
+                    player.move(player.last_pos)
+                elif event.key == pg.K_DOWN:
+                    player.tile_angle = 270
+                    player.move(player.last_pos)
                 else:
                     player.select(event.key)
                     if keyboard:
