@@ -752,13 +752,15 @@ class EventQueue:
         self.queue.append(event)
 
     def cancel_event(self, event: str):
-        self.queue.remove(event)
+        if event in self.queue:
+            self.queue.remove(event)
 
     def add_listener(self, listener: Listener):
         self.listeners.append(listener)
 
     def remove_listener(self, listener: Listener):
-        self.listeners.remove(listener)
+        if listener in self.listeners:
+            self.listeners.remove(listener)
 
     def listener_check(self):
         for l in self.listeners:
@@ -766,7 +768,7 @@ class EventQueue:
 
 
 class TE:
-    def __init__(self, text: str, position: list, trigger: str, dismiss: str, dismiss_event: str, activation_event = None):
+    def __init__(self, text: str, position: list, trigger: str, dismiss: str, dismiss_event: str, activation_event=None):
         self.enabled = False
         self.text = text
         self.position = position
@@ -775,24 +777,24 @@ class TE:
         self.dismiss = dismiss
         global queue
         if activation_event is not None:
-            queue.add_listener(Listener(activation_event, self.add_listeners, []))
+            queue.add_listener(Listener(activation_event, self.add_listener, []))
         else:
-            self.add_listeners()
+            self.add_listener()
 
 
     def start(self):
         self.enabled = True
-        print("Event start")
+        queue.add_listener(Listener(self.dismiss, self.stop, []))
 
     def stop(self):
         self.enabled = False
+        queue.queue = []
         queue.event(self.dismiss_event)
-        handler.tutorials.remove(self)
-        print("Event stop")
+        if self in handler.tutorials:
+            handler.tutorials.remove(self)
 
-    def add_listeners(self):
+    def add_listener(self):
         queue.add_listener(Listener(self.trigger, self.start, []))
-        queue.add_listener(Listener(self.dismiss, self.stop, []))
 
     def update(self):
         if self.enabled:
