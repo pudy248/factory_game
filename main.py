@@ -886,13 +886,17 @@ while True:
             else:
                 if keyboard:
                     if event.key == pg.K_a:
-                        player.move((player.last_pos[0] - TILE_SIZE, player.last_pos[1]))
+                        if player.last_pos[0] > 0:
+                            player.move((player.last_pos[0] - TILE_SIZE, player.last_pos[1]))
                     elif event.key == pg.K_d:
-                        player.move((player.last_pos[0] + TILE_SIZE, player.last_pos[1]))
+                        if player.last_pos[0] < W:
+                            player.move((player.last_pos[0] + TILE_SIZE, player.last_pos[1]))
                     elif event.key == pg.K_w:
-                        player.move((player.last_pos[0], player.last_pos[1] - TILE_SIZE))
+                        if player.last_pos[1] > 0:
+                            player.move((player.last_pos[0], player.last_pos[1] - TILE_SIZE))
                     elif event.key == pg.K_s:
-                        player.move((player.last_pos[0], player.last_pos[1] + TILE_SIZE))
+                        if player.last_pos[1] < H:
+                            player.move((player.last_pos[0], player.last_pos[1] + TILE_SIZE))
                     elif event.key == pg.K_RETURN or event.key == pg.K_SPACE:
                         player.click(player.last_pos)
                     elif event.key == pg.K_RSHIFT:
