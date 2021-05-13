@@ -807,12 +807,12 @@ class TutorialHandler:
 
 
 queue = EventQueue()
-tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click"),
-             TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "click", "tab"),
-             TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "tab", "ExtractorSelect"),
-             TE("Click on a resource tile to place the extractor", [50, 50], "ExtractorSelect", "ExtractorPlace"),
-             TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "ExtractorPlace", "BeltSelect"),
-             TE("Click on any non-resource tile to place the belt", [50, 50], "BeltSelect", "BeltPlace")]  # list of TutorialElement objects
+tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "start", "1"),
+             TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "click", "tab", "1", "2"),
+             TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "tab", "ExtractorSelect", "2", "3"),
+             TE("Click on a resource tile to place the extractor", [50, 50], "ExtractorSelect", "ExtractorPlace", "3", "4"),
+             TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "ExtractorPlace", "BeltSelect", "4, 5"),
+             TE("Click on any non-resource tile to place the belt", [50, 50], "BeltSelect", "BeltPlace", "5", "6")]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
