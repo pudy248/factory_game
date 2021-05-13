@@ -738,7 +738,7 @@ class Listener:
         for e in event_list:
             if e == self.event:
                 self.func(*self.args)
-                #queue.cancel_event(self.event)
+                queue.cancel_event(self.event)
                 queue.remove_listener(self)
 
 
