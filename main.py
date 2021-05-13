@@ -418,18 +418,28 @@ class Player:
             x = int((pos[0] - W / 3)/(W / 18))
             if x == 0:
                 self.selected_tile = "Extractor"
+                queue.event("ExtractorSelect")
             elif x == 1:
                 self.selected_tile = "Manufacturer"
+                queue.event("ManufacturerSelect")
             elif x == 2:
                 self.selected_tile = "Belt"
+                queue.event("BeltSelect")
             elif x == 3:
                 self.selected_tile = "Intersection"
+                queue.event("IntersectionSelect")
             elif x == 4:
                 self.selected_tile = "Splitter"
+                queue.event("SplitterSelect")
             elif x == 5:
                 self.selected_tile = "Void"
+                queue.event("VoidSelect")
         elif self.is_in_level():
             if self.can_place():
+                if self.selected_tile == "Extractor":
+                    queue.event("ExtractorPlace")
+                elif self.selected_tile == "Belt":
+                    queue.event("BeltPlace")
                 self.place()
 
 
@@ -441,16 +451,22 @@ class Player:
     def select(self, key):
         if key == pg.K_1:
             self.selected_tile = "Extractor"
+            queue.event("ExtractorSelect")
         elif key == pg.K_2:
             self.selected_tile = "Manufacturer"
+            queue.event("ManufacturerSelect")
         elif key == pg.K_3:
             self.selected_tile = "Belt"
+            queue.event("BeltSelect")
         elif key == pg.K_4:
             self.selected_tile = "Intersection"
+            queue.event("IntersectionSelect")
         elif key == pg.K_5:
             self.selected_tile = "Splitter"
+            queue.event("SplitterSelect")
         elif key == pg.K_6:
             self.selected_tile = "Void"
+            queue.event("VoidSelect")
         elif key == pg.K_r:
             self.tile_angle = (self.tile_angle - 90) % 360
 
@@ -722,7 +738,7 @@ class Listener:
         for e in event_list:
             if e == self.event:
                 self.func(*self.args)
-                queue.cancel_event(self.event)
+                #queue.cancel_event(self.event)
                 queue.remove_listener(self)
 
 
@@ -791,10 +807,12 @@ class TutorialHandler:
 
 
 queue = EventQueue()
-tutorials = [  # list of TutorialElement objects
-    TE("Hi, welcome to FactoryGame! Left click to continue.", [3 * H / 5, H / 3], "LevelStart1", "LC", "next1"),
-    TE("To start, click on the Extractor in the hotbar", [W / 3, 4 * H / 5], "RC", "ExtractorSelect", "next1" "next2"),
-]
+tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "start", "1"),
+             TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "click", "tab", "1", "2"),
+             TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "tab", "ExtractorSelect", "2", "3"),
+             TE("Click on a resource tile to place the extractor", [50, 50], "ExtractorSelect", "ExtractorPlace", "3", "4"),
+             TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "ExtractorPlace", "BeltSelect", "4, 5"),
+             TE("Click on any non-resource tile to place the belt", [50, 50], "BeltSelect", "BeltPlace", "5", "6")]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
@@ -857,7 +875,8 @@ while True:
                     else:
                         print(lvlNum)
                         level = load.load_level(lvlNum)
-                        queue.event("LevelStart" + str(level.number))
+                        print(level.number)
+                    queue.event("start")
                     tutorial_cleared = True
                     player.move((W/2, H/2))
             else:
@@ -888,6 +907,7 @@ while True:
                         player.remove(player.last_pos)
                 if event.key == pg.K_TAB:
                     rc.show_recipes = not rc.show_recipes
+                    queue.event("tab")
                 elif event.key == pg.K_BACKSPACE:
                     level = load.load_level(level.number)
                 elif event.key == pg.K_LSHIFT:
@@ -899,10 +919,9 @@ while True:
         elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared and not keyboard:
             if event.button == pg.BUTTON_LEFT:
                 player.click(event.pos)
-                queue.event("LC")
+                queue.event("click")
             elif event.button == pg.BUTTON_RIGHT:
                 player.remove(event.pos)
-                queue.event("RC")
     f = pg.font.SysFont("Arial", 15)
     s = pg.font.SysFont("Arial Bold", 50)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
