@@ -738,7 +738,7 @@ class Listener:
         for e in event_list:
             if e == self.event:
                 self.func(*self.args)
-                #queue.cancel_event(self.event)
+                queue.cancel_event(self.event)
                 queue.remove_listener(self)
 
 
@@ -810,12 +810,12 @@ class TutorialHandler:
 
 
 queue = EventQueue()
-tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "start", "1"),
-             TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "click", "tab", "1", "2"),
-             TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "tab", "ExtractorSelect", "2", "3"),
-             TE("Click on a resource tile to place the extractor", [50, 50], "ExtractorSelect", "ExtractorPlace", "3", "4"),
-             TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "ExtractorPlace", "BeltSelect", "4", "5"),
-             TE("Click on any non-resource tile to place the belt", [50, 50], "BeltSelect", "BeltPlace", "5", "6")]  # list of TutorialElement objects
+tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "1"),
+             TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "1", "tab", "2"),
+             TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "2", "ExtractorSelect", "3"),
+             TE("Click on a resource tile to place the extractor", [50, 50], "3", "ExtractorPlace", "4"),
+             TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "4", "BeltSelect", "5"),
+             TE("Click on any non-resource tile to place the belt", [50, 50], "5", "BeltPlace", "6")]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
