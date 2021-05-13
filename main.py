@@ -765,16 +765,18 @@ class EventQueue:
 
 
 class TE:
-    def __init__(self, text: str, position: list, trigger: str, dismiss: str, activate_event: str, dismiss_event: str):
+    def __init__(self, text: str, position: list, trigger: str, dismiss: str, dismiss_event: str, activation_event = None):
         self.enabled = False
         self.text = text
         self.position = position
         self.dismiss_event = dismiss_event
-        self.activate_event = activate_event
         self.trigger = trigger
         self.dismiss = dismiss
         global queue
-        queue.add_listener(Listener(activate_event, self.add_listeners, []))
+        if activation_event is not None:
+            queue.add_listener(Listener(activation_event, self.add_listeners, []))
+        else:
+            self.add_listeners()
 
 
     def start(self):
