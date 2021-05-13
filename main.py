@@ -811,7 +811,7 @@ tutorials = [TE("Welcome to the factory game, your goal is to feed the Overlord 
              TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "click", "tab", "1", "2"),
              TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "tab", "ExtractorSelect", "2", "3"),
              TE("Click on a resource tile to place the extractor", [50, 50], "ExtractorSelect", "ExtractorPlace", "3", "4"),
-             TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "ExtractorPlace", "BeltSelect", "4, 5"),
+             TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "ExtractorPlace", "BeltSelect", "4", "5"),
              TE("Click on any non-resource tile to place the belt", [50, 50], "BeltSelect", "BeltPlace", "5", "6")]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
