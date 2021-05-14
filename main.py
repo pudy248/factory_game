@@ -814,12 +814,31 @@ class TutorialHandler:
 
 
 queue = EventQueue()
-tutorials = [[TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "1"),
+tutorials = [[TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "0"),
+              TE("In this level the Overlord requires wood, as shown by the image on the corner of the tile", [50, 50], "0", "click", "1"),
              TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "1", "tab", "2"),
              TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "2", "ExtractorSelect", "3"),
              TE("Click on a resource tile to place the extractor", [50, 50], "3", "ExtractorPlace", "4"),
              TE("Select the conveyor belt by pressing the 3 key or clicking it on the hotbar", [50, 50], "4", "BeltSelect", "5"),
-             TE("Click on any non-resource tile to place the belt", [50, 50], "5", "BeltPlace", "6")]]  # list of TutorialElement objects
+             TE("Click on any non-resource tile to place the belt", [50, 50], "5", "BeltPlace", "6")],
+             [TE("Press R or use arrow keys to rotate tiles", [50, 50], "lev2start", "rotate", "2_1"),
+              TE("Combine iron ore and wood by inputting both resources into a manufacturer", [50, 50], "1",
+                 "ManufacturerPlace", "2"),
+              TE("If you make a mistake you can right click a tile to delete it, or press backspace to reset the level",
+                 [50, 50], "2", "rightClick", "3"),
+              TE("Craft iron bars and deliver them to the Overlord to beat the level)", [50, 50], "3", "click", "4")],
+             [TE("Refined items can be further crafted to create other goods", [50, 50], "Lev3start", "click", "1"),
+              TE("Remember to check the crafting tree on the left of the screen, the Overlord now requires steel",
+                 [50, 50], "1", "click", "2"),
+              TE("Use the crafting tree to help craft steel bars and beat the level", [50, 50], "2",
+                 "stay", "3")],
+             [TE("Use everything you've learned to get the Overlord its screws", [50, 50], "Lev4start", "stay", "1")],
+             [TE("This level introduces splitters, which separate items on them between each of its sides", [50, 50],
+                 "Lev5start", "SplitterPlace", "1"),
+              TE("Rotating a splitter 180 degrees will switch how it divides items", [50, 50], "1", "click", "2"),
+              TE("The Overlord rejects offerings with unwanted materials", [50, 50], "2", "stay", "3")],
+             TE("Now that you have some experience with the game, try to beat the remaining levels on your own", [50, 50], "lev7start", "click", "1")]
+             # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
