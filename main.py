@@ -408,6 +408,7 @@ class Player:
             level.tile_array[self.get_y()][self.get_x()].resource)
 
     def remove(self, pos):
+        queue.event("rightClick")
         if self.get_tile() and level.tile_array[self.get_y()][self.get_x()].resource not in ["E", "C", "BG"]:
             level.dirty = True
             self.last_pos = pos
@@ -418,6 +419,7 @@ class Player:
 
     def click(self, pos):
         self.last_pos = pos
+        queue.event("click")
         if W / 3 <= pos[0] <= 2 * W / 3 and hotbar_pos <= pos[1] <= H:
             x = int((pos[0] - W / 3)/(W / 18))
             if x == 0:
@@ -444,6 +446,8 @@ class Player:
                     queue.event("ExtractorPlace")
                 elif self.selected_tile == "Belt":
                     queue.event("BeltPlace")
+                elif self.selected_tile == "Manufacturer":
+                    queue.event("ManufacturerPlace")
                 self.place()
 
 
@@ -473,6 +477,7 @@ class Player:
             queue.event("VoidSelect")
         elif key == pg.K_r:
             self.tile_angle = (self.tile_angle - 90) % 360
+            queue.event("rotate")
 
 
 class Extractor(Tile):
@@ -913,25 +918,32 @@ while True:
                 elif event.key == pg.K_RIGHT:
                     player.tile_angle = 0
                     player.move(player.last_pos)
+                    queue.event("rotate")
                 elif event.key == pg.K_LEFT:
                     player.tile_angle = 180
                     player.move(player.last_pos)
+                    queue.event("rotate")
                 elif event.key == pg.K_UP:
                     player.tile_angle = 90
                     player.move(player.last_pos)
+                    queue.event("rotate")
                 elif event.key == pg.K_DOWN:
                     player.tile_angle = 270
                     player.move(player.last_pos)
+                    queue.event("rotate")
                 else:
                     player.select(event.key)
                     if keyboard:
                         player.move(player.last_pos)
-        elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared and not keyboard:
+        elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared:
             if event.button == pg.BUTTON_LEFT:
-                player.click(event.pos)
+                if keyboard:
+                    player.click(event.pos)
                 queue.event("click")
             elif event.button == pg.BUTTON_RIGHT:
-                player.remove(event.pos)
+                if keyboard:
+                    player.remove(event.pos)
+                queue.event("rightClick")
     f = pg.font.SysFont("Arial", 15)
     s = pg.font.SysFont("Arial Bold", 50)
     r = f.render(str(int(30 / sum(fps_arr))), True, pg.Color("white"))
