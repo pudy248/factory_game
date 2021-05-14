@@ -937,11 +937,11 @@ while True:
                         player.move(player.last_pos)
         elif event.type == pg.MOUSEBUTTONUP and tutorial_cleared:
             if event.button == pg.BUTTON_LEFT:
-                if keyboard:
+                if not keyboard:
                     player.click(event.pos)
                 queue.event("click")
             elif event.button == pg.BUTTON_RIGHT:
-                if keyboard:
+                if not keyboard:
                     player.remove(event.pos)
                 queue.event("rightClick")
     f = pg.font.SysFont("Arial", 15)
