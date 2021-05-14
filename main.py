@@ -38,6 +38,7 @@ class Level:
         self.transition_cd = 0
         if self.number > 0:
             global player
+            queue.event("lev" + str(self.number) + "start")
             player.move((W / 2, H / 2))
 
     def world_tick(self):
