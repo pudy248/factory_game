@@ -808,8 +808,9 @@ class TutorialHandler:
 
     def frame_update(self):
         queue.listener_check()
-        if len(self.tutorials) > 0:
-            self.tutorials[level.number + 1][0].update()
+        if len(self.tutorials) >= level.number:
+            for i in range(len(self.tutorials[level.number - 1])):
+                self.tutorials[level.number - 1][i].update()
 
 
 queue = EventQueue()
