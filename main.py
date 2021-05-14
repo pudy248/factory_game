@@ -827,17 +827,18 @@ tutorials = [[TE("Welcome to the factory game, your goal is to feed the Overlord
               TE("If you make a mistake you can right click a tile to delete it, or press backspace to reset the level",
                  [50, 50], "2", "rightClick", "3"),
               TE("Craft iron bars and deliver them to the Overlord to beat the level)", [50, 50], "3", "click", "4")],
-             [TE("Refined items can be further crafted to create other goods", [50, 50], "Lev3start", "click", "1"),
+             [TE("Refined items can be further crafted to create other goods", [50, 50], "lev3start", "click", "1"),
               TE("Remember to check the crafting tree on the left of the screen, the Overlord now requires steel",
                  [50, 50], "1", "click", "2"),
               TE("Use the crafting tree to help craft steel bars and beat the level", [50, 50], "2",
                  "stay", "3")],
-             [TE("Use everything you've learned to get the Overlord its screws", [50, 50], "Lev4start", "stay", "1")],
+             [TE("Use everything you've learned to get the Overlord its screws", [50, 50], "lev4start", "stay", "1")],
              [TE("This level introduces splitters, which separate items on them between each of its sides", [50, 50],
                  "Lev5start", "SplitterPlace", "1"),
               TE("Rotating a splitter 180 degrees will switch how it divides items", [50, 50], "1", "click", "2"),
               TE("The Overlord rejects offerings with unwanted materials", [50, 50], "2", "stay", "3")],
-             TE("Now that you have some experience with the game, try to beat the remaining levels on your own", [50, 50], "lev7start", "click", "1")]
+            [TE("This level introduces intersection belts, which let items pass through them from multiple directions", [50, 50], "lev6start", "IntersectionPlace", "1")],
+             [TE("Now that you have some experience with the game, try to beat the remaining levels on your own", [50, 50], "lev7start", "click", "1")]]
              # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
