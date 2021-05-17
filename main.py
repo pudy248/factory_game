@@ -843,8 +843,8 @@ lv3t = [TE("Refined items can be further crafted to create other goods", [50, 50
         TE("Use the crafting tree to help craft steel bars and beat the level", [50, 50], "3_2", "stay", "3_3")]
 lv4t = [TE("Use everything you've learned to get the Overlord its screws", [50, 50], "lev4start", "stay", "4_1")]
 lv5t = [TE("This level introduces splitters, which separate items on them between each of its sides", [50, 50], "lev5start", "SplitterPlace", "5_1"),
-        TE("Rotating a splitter 180 degrees will switch how it divides items", [50, 50], "5_1", "click", "5_2"),
-        TE("The Overlord rejects offerings with unwanted materials", [50, 50], "5_2", "click", "5_3")]
+        TE("The Overlord rejects offerings with unwanted materials", [50, 50], "5_1", "click", "5_2"),
+        TE("Rotating a splitter 180 degrees will switch how it divides items", [50, 50], "5_2", "click", "5_3")]
 lv6t = [TE("This level introduces intersection belts, which let items pass through them from multiple directions", [50, 50], "lev6start", "IntersectionPlace", "6_1")]
 tutorials = [lv1t, lv2t, lv3t, lv4t, lv5t, lv6t]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
