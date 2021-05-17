@@ -450,6 +450,8 @@ class Player:
                     queue.event("ManufacturerPlace")
                 elif self.selected_tile == "Splitter":
                     queue.event("SplitterPlace")
+                elif self.selected_tile == "Intersection":
+                    queue.event("IntersectionPlace")
                 self.place()
 
 
