@@ -25,6 +25,7 @@ else:
 bufferSize = 9
 transition_cd = 0
 
+
 class Level:
     def __init__(self, tMap, g, n):
         self.number = n
@@ -348,7 +349,7 @@ class Tile:
             while i < len(self.items):
                 if not self.items[i].moved and self.items[i].offset > 1 and \
                         -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(
-                    self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                        self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                     temp = self.items.pop(i)
                     temp.moved = True
                     temp.manufactured = False
@@ -454,7 +455,6 @@ class Player:
                     queue.event("IntersectionPlace")
                 self.place()
 
-
     def move(self, pos):
         self.last_pos = pos
         self.ghost_tile = sys.modules[__name__].__getattribute__(self.selected_tile)(
@@ -551,7 +551,7 @@ class Manufacturer(Tile):
         while i < len(self.items):
             if not self.items[i].moved and self.items[i].offset > 1 and \
                     -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(
-                self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                    self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                 temp = self.items.pop(i)
                 temp.moved = True
                 temp.manufactured = False
@@ -602,7 +602,7 @@ class Intersection(Belt):
         while i < len(self.items):
             if not self.items[i].moved and self.items[i].offset > 1 and \
                     -1 < int(self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(
-                self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
+                    self.pos[0] + self.items[i].direction.x) < len(level.tile_array[0]):
                 temp = self.items.pop(i)
                 temp.moved = True
                 temp.manufactured = False
@@ -642,9 +642,8 @@ class Splitter(Belt):
         i = 0
         while i < len(self.items):
             if not self.items[i].moved and self.items[i].offset > 1 and -1 < int(
-                    self.pos[1] - self.items[i].direction.y) \
-                    < len(level.tile_array) and -1 < int(self.pos[0] + self.items[i].direction.x) < len(
-                level.tile_array[0]):
+                    self.pos[1] - self.items[i].direction.y) < len(level.tile_array) and -1 < int(self.pos[0]
+                    + self.items[i].direction.x) < len(level.tile_array[0]):
                 temp = self.items.pop(i)
                 temp.moved = True
                 temp.manufactured = False
@@ -791,7 +790,6 @@ class TE:
         else:
             self.add_listener()
 
-
     def start(self):
         self.enabled = True
         queue.add_listener(Listener(self.dismiss, self.stop, []))
@@ -828,8 +826,8 @@ keyless = ["Click on a resource tile to place the extractor",
            "Click on any non-resource tile to place the belt",
            "If you make a mistake you can right click a tile to delete it, or press backspace to reset the level"]
 keyful = ["Push enter or space over a resource tile to place the extractor",
-           "Push enter or space over any non-resource tile to place the belt",
-           "If you make a mistake you can push right shift over a tile to delete it, or press backspace to reset the level",]
+       "Push enter or space over any non-resource tile to place the belt",
+       "If you make a mistake you can push right shift over a tile to delete it, or press backspace to reset the level"]
 lv1t = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "1_1"),
         TE("Press TAB to hide/show the hotbar and recipes", [50, 50], "1_1", "tab", "1_2"),
         TE("Select the extractor by either clicking it on the hotbar, or pressing the 1 key", [50, 50], "1_2", "ExtractorSelect", "1_3"),
@@ -991,10 +989,8 @@ while True:
         scoreSurf = pg.Surface((ww, tm.get_height() + 10))
         scoreSurf.fill((0, 67, 156))
         scoreSurf.blit(tm, ((scoreSurf.get_width() - (tm.get_width() + sc.get_width() + hs.get_width())) / 2, 5))
-        scoreSurf.blit(sc, (
-        (scoreSurf.get_width() - (tm.get_width() + sc.get_width() + hs.get_width())) / 2 + tm.get_width(), 5))
-        scoreSurf.blit(hs, ((scoreSurf.get_width() - (
-                    tm.get_width() + sc.get_width() + hs.get_width())) / 2 + tm.get_width() + sc.get_width(), 5))
+        scoreSurf.blit(sc, ((scoreSurf.get_width() - (tm.get_width() + sc.get_width() + hs.get_width())) / 2 + tm.get_width(), 5))
+        scoreSurf.blit(hs, ((scoreSurf.get_width() - (tm.get_width() + sc.get_width() + hs.get_width()))/ 2 + tm.get_width() + sc.get_width(), 5))
         scoreSurf.set_alpha(150)
         SURF.blit(scoreSurf, ((W - ww) / 2, (TILE_SIZE - tm.get_height()) / 2))
     if tutorial_cleared and not keyboard:
