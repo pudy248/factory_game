@@ -842,15 +842,18 @@ lv2t = [TE("Press R or use arrow keys to rotate tiles", [50, 50], "lev2start", "
         TE("Combine iron ore and wood by inputting both resources into a manufacturer", [50, 50], "2_1", "ManufacturerPlace", "2_2"),
         TE("If you make a mistake you can right click a tile to delete it, or press backspace to reset the level", [50, 50], "2_2", "rightClick", "2_3"),
         TE("Craft iron bars and deliver them to the Overlord to beat the level", [50, 50], "2_3", "stay", "2_4")]
-lv3t = [TE("Refined items can be further crafted to create other goods", [50, 50], "lev3start", "click", "3_1"),
-        TE("Remember to check the crafting tree on the left of the screen, the Overlord now requires steel", [50, 50], "3_1", "click", "3_2"),
-        TE("Use the crafting tree to help craft steel bars and beat the level", [50, 50], "3_2", "stay", "3_3")]
+lv3t = [TE("Extractors also act as belts; route the wood on top of the iron before sending both to a manufacturer.", [50, 50], "lev3start", "click", "3_1"),
+        TE("Refined items can be further crafted to create other goods", [50, 50], "3_1", "click", "3_2"),
+        TE("Remember to check the crafting tree on the left of the screen, the Overlord now requires steel", [50, 50], "3_2", "click", "3_3"),
+        TE("Use the crafting tree to help craft steel bars and beat the level", [50, 50], "3_3", "stay", "3_4")]
 lv4t = [TE("Use everything you've learned to get the Overlord its screws", [50, 50], "lev4start", "stay", "4_1")]
 lv5t = [TE("This level introduces splitters, which separate items on them between each of its sides", [50, 50], "lev5start", "SplitterPlace", "5_1"),
-        TE("Rotating a splitter 180 degrees will switch how it divides items", [50, 50], "5_1", "click", "5_2"),
-        TE("The Overlord rejects offerings with unwanted materials", [50, 50], "5_2", "click", "5_3")]
+        TE("The Overlord rejects offerings with unwanted materials", [50, 50], "5_1", "click", "5_2"),
+        TE("Rotating a splitter 180 degrees will switch how it divides items", [50, 50], "5_2", "click", "5_3")]
 lv6t = [TE("This level introduces intersection belts, which let items pass through them from multiple directions", [50, 50], "lev6start", "IntersectionPlace", "6_1")]
-tutorials = [lv1t, lv2t, lv3t, lv4t, lv5t, lv6t]  # list of TutorialElement objects
+lv10t = [TE("You made it to the final level! You'll need every skill you've learned so far to beat this one.", [int(2 * W / 5), int(2 * H / 5)], "lev10start", "click", "10_1")]
+
+tutorials = [lv1t, lv2t, lv3t, lv4t, lv5t, lv6t, [], [], [], lv10t]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
