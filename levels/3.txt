@@ -1,5 +1,5 @@
 nw n n n ne
-w W - X e
+w W X X e
 w I - X e
 w C - E e
 sw s s s se
