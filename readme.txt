@@ -7,5 +7,6 @@ Pressing left shift will toggle keyboard only mode, where the selected tile no l
 While in keyboard only mode you can place tiles with the space bar or enter key, and can remove them by pressing the right shift key.
 While in either mode you can rotate tiles either by using the r key, which will rotate them 90°, or by selecting the direction for them to face with the arrow keys, and tiles can be selected by pressing a number key based on the hotbar.
 To toggle the hotbar and crafting tree press the tab key.
+After each level you will receive a score based on the time you took to complete the level.
 
 UmllcyB3YW50cyB1cyB0byBjb25ncmF0dWxhdGUgeW91IGZvciByZWFkaW5nIHRoZSBSRUFETUUgZmlsZS4gU28sIHRoYW5rIHlvdS4=
