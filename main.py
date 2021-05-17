@@ -824,10 +824,12 @@ class TutorialHandler:
 
 
 queue = EventQueue()
-keyless = ["Click on a resource tile to place the extractor",
+keyless = ["Press TAB to hide/show the hotbar and recipes",
+           "Click on a resource tile to place the extractor",
            "Click on any non-resource tile to place the belt",
            "If you make a mistake you can right click a tile to delete it, or press backspace to reset the level"]
-keyful = ["Push enter or space over a resource tile to place the extractor",
+keyful = ["Press TAB to hide/show the hotbar and recipes. Use WASD to move the selected tile.",
+          "Push enter or space over a resource tile to place the extractor",
            "Push enter or space over any non-resource tile to place the belt",
            "If you make a mistake you can push right shift over a tile to delete it, or press backspace to reset the level",]
 lv1t = [TE("Welcome to the factory game, your goal is to feed the Overlord a steady supply of goods", [50, 50], "start", "click", "1_1"),
@@ -840,18 +842,15 @@ lv2t = [TE("Press R or use arrow keys to rotate tiles", [50, 50], "lev2start", "
         TE("Combine iron ore and wood by inputting both resources into a manufacturer", [50, 50], "2_1", "ManufacturerPlace", "2_2"),
         TE("If you make a mistake you can right click a tile to delete it, or press backspace to reset the level", [50, 50], "2_2", "rightClick", "2_3"),
         TE("Craft iron bars and deliver them to the Overlord to beat the level", [50, 50], "2_3", "stay", "2_4")]
-lv3t = [TE("Extractors also act as belts; route the wood on top of the iron before sending both to a manufacturer.", [50, 50], "lev3start", "click", "3_1"),
-        TE("Refined items can be further crafted to create other goods", [50, 50], "3_1", "click", "3_2"),
-        TE("Remember to check the crafting tree on the left of the screen, the Overlord now requires steel", [50, 50], "3_2", "click", "3_3"),
-        TE("Use the crafting tree to help craft steel bars and beat the level", [50, 50], "3_3", "stay", "3_4")]
+lv3t = [TE("Refined items can be further crafted to create other goods", [50, 50], "lev3start", "click", "3_1"),
+        TE("Remember to check the crafting tree on the left of the screen, the Overlord now requires steel", [50, 50], "3_1", "click", "3_2"),
+        TE("Use the crafting tree to help craft steel bars and beat the level", [50, 50], "3_2", "stay", "3_3")]
 lv4t = [TE("Use everything you've learned to get the Overlord its screws", [50, 50], "lev4start", "stay", "4_1")]
 lv5t = [TE("This level introduces splitters, which separate items on them between each of its sides", [50, 50], "lev5start", "SplitterPlace", "5_1"),
-        TE("The Overlord rejects offerings with unwanted materials", [50, 50], "5_1", "click", "5_2"),
-        TE("Rotating a splitter 180 degrees will switch how it divides items", [50, 50], "5_2", "click", "5_3")]
+        TE("Rotating a splitter 180 degrees will switch how it divides items", [50, 50], "5_1", "click", "5_2"),
+        TE("The Overlord rejects offerings with unwanted materials", [50, 50], "5_2", "click", "5_3")]
 lv6t = [TE("This level introduces intersection belts, which let items pass through them from multiple directions", [50, 50], "lev6start", "IntersectionPlace", "6_1")]
-lv10t = [TE("You made it to the final level! You'll need every skill you've learned so far to beat this one.", [int(2 * W / 5), int(2 * H / 5)], "lev10start", "click", "10_1")]
-
-tutorials = [lv1t, lv2t, lv3t, lv4t, lv5t, lv6t, [], [], [], lv10t]  # list of TutorialElement objects
+tutorials = [lv1t, lv2t, lv3t, lv4t, lv5t, lv6t]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
@@ -872,7 +871,7 @@ t = time.perf_counter()
 dt = 0
 fps_arr = [1 / FPS] * 30
 tutorial_cleared = False
-tutorial_text = "The Overlord requires a tribute of industrial parts and machinery. To construct this machinery, you must extract resources and combine them into more developed goods, using extractors and manufacturers respectively. You can select these, as well as other important tiles, using the number pad. Left click to drop tiles, right click to delete them, and push r to rotate. Extractors act as belts, you cannot build on rocks, and The Overlord requires a constant influx of the target item to be satisfied. You can see the target item on the corner of The Overlord, and the recipes to manufacture items can be toggled with the tab key. The Overlord will give you a score based on the speed of your completion following each of the 10 levels. At any time, you may surrender to The Overlord with the escape key, or reset your level with the backspace button. Push any key to go to that level, or enter to start from the beginning. You can toggle between keyboard and mouse controls with the left shift key."
+tutorial_text = "The Overlord requires a tribute of industrial parts and machinery. Push any number key to go to that level, or enter to start from the beginning. You can toggle between keyboard and mouse controls with the left shift key."
 score = 0
 hiScore = 0
 queue.event("GameOpen")
@@ -908,13 +907,15 @@ while True:
             if event.key == pg.K_LSHIFT:
                 keyboard = not keyboard
                 if keyboard:
-                    tutorials[0][3].text = keyful[0]
-                    tutorials[0][5].text = keyful[1]
-                    tutorials[1][3].text = keyful[2]
+                    tutorials[0][1].text = keyful[0]
+                    tutorials[0][3].text = keyful[1]
+                    tutorials[0][5].text = keyful[2]
+                    tutorials[1][3].text = keyful[3]
                 else:
-                    tutorials[0][3].text = keyless[0]
-                    tutorials[0][5].text = keyless[1]
-                    tutorials[1][3].text = keyless[2]
+                    tutorials[0][1].text = keyless[0]
+                    tutorials[0][3].text = keyless[1]
+                    tutorials[0][5].text = keyless[2]
+                    tutorials[1][3].text = keyless[3]
             if not tutorial_cleared:
                 if event.key in numKeys:
                     lvlNum = numKeys.index(event.key)
