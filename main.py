@@ -847,7 +847,9 @@ lv5t = [TE("This level introduces splitters, which separate items on them betwee
         TE("The Overlord rejects offerings with unwanted materials", [50, 50], "5_1", "click", "5_2"),
         TE("Rotating a splitter 180 degrees will switch how it divides items", [50, 50], "5_2", "click", "5_3")]
 lv6t = [TE("This level introduces intersection belts, which let items pass through them from multiple directions", [50, 50], "lev6start", "IntersectionPlace", "6_1")]
-tutorials = [lv1t, lv2t, lv3t, lv4t, lv5t, lv6t]  # list of TutorialElement objects
+lv10t = [TE("You made it to the final level! You'll need every skill you've learned so far to beat this one.", [int(2 * W / 5), int(2 * H / 5)], "lev10start", "click", "10_1")]
+
+tutorials = [lv1t, lv2t, lv3t, lv4t, lv5t, lv6t, [], [], [], lv10t]  # list of TutorialElement objects
 handler = TutorialHandler(tutorials)
 rc = RecipeCollection((Recipe(["Alloy Plate", "Machine Parts", "Steel Tubes"], ["Engines"]),
                        Recipe(["Engines", "Alloy Plate", "Gasoline"], ["Automobiles"]),
